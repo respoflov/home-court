@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0B0E15">
+<link rel="manifest" href="wakelock-test.webmanifest">
+<title>화면 켜두기 테스트 · 홈코트</title>
+<style>
+:root{--void:#0B0E15;--surface:#12161F;--line:rgba(233,238,247,.09);--ink:#E9EEF7;
+--tx2:rgba(233,238,247,.62);--tx3:rgba(233,238,247,.40);--buzzer:#FFA31A;--ok:#3FB950;--bad:#FF4D2E;--warn:#FFA31A}
+*{box-sizing:border-box;margin:0}
+body{background:var(--void);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",system-ui,sans-serif;
+padding:max(28px,env(safe-area-inset-top)) 20px max(40px,env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+h1{font-size:21px;font-weight:700;letter-spacing:-.02em}
+h1 small{display:block;font-size:12.5px;font-weight:400;color:var(--tx3);margin-top:5px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:17px 18px;margin-top:16px}
+.card h2{font-size:11px;font-weight:700;letter-spacing:.11em;color:var(--tx3);margin-bottom:12px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.row:last-child{border-bottom:0}
+.row span:first-child{color:var(--tx2)}
+.row b{font-weight:600;font-variant-numeric:tabular-nums}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.big{font-size:44px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;text-align:center;padding:8px 0 2px}
+button{width:100%;padding:16px;border:0;border-radius:13px;font:700 16px/1 inherit;margin-top:9px;
+background:var(--buzzer);color:#140C00}
+button.ghost{background:transparent;border:1px solid rgba(233,238,247,.16);color:var(--tx2)}
+ol{margin:0 0 0 18px;font-size:13.5px;color:var(--tx2)}
+ol li{margin-bottom:9px}
+ol b{color:var(--ink)}
+#log{background:#0a0d13;border:1px solid var(--line);border-radius:11px;padding:12px;font:12px/1.6 ui-monospace,Menlo,monospace;
+height:190px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+#log .t{color:var(--tx3)}#log .g{color:var(--ok)}#log .r{color:var(--bad)}#log .y{color:var(--warn)}
+.note{margin-top:14px;padding:12px 14px;border-radius:11px;background:rgba(255,163,26,.13);color:var(--buzzer);font-size:12.5px}
+.stamp{text-align:center;font-size:9.5px;font-weight:600;letter-spacing:.32em;text-indent:.32em;color:rgba(233,238,247,.24);margin-top:26px}
+</style>
+</head>
+<body>
+<h1>화면 켜두기 테스트<small>홈코트 · Screen Wake Lock이 실제로 자동 잠금을 막는지 확인합니다</small></h1>
+
+<div class="card" id="banner" hidden></div>
+
+<div class="card">
+  <h2>1 · 실행 환경</h2>
+  <div class="row"><span>보안 컨텍스트(HTTPS)</span><b id="e-sec">–</b></div>
+  <div class="row"><span>홈 화면 앱(standalone)</span><b id="e-sa">–</b></div>
+  <div class="row"><span>Wake Lock API</span><b id="e-api">–</b></div>
+  <div class="row"><span>기기 / 버전</span><b id="e-ua" style="font-size:11px;text-align:right">–</b></div>
+</div>
+
+<div class="card">
+  <h2>2 · 상태</h2>
+  <div class="big" id="m-elapsed">00:00</div>
+  <div class="row"><span>잠금 유지</span><b id="m-held">–</b></div>
+  <div class="row"><span>재획득 횟수</span><b id="m-re">0</b></div>
+  <div class="row"><span>화면 꺼짐/전환 횟수</span><b id="m-hide">0</b></div>
+  <button id="btn-on">화면 켜두기 시작</button>
+  <button id="btn-off" class="ghost">해제</button>
+</div>
+
+<div class="card">
+  <h2>3 · 테스트 순서</h2>
+  <ol>
+    <li><b>화면 켜두기 시작</b>을 누릅니다. "잠금 유지"가 <b>예</b>가 되어야 합니다.</li>
+    <li>기기를 <b>그대로 두고 2~3분 기다립니다.</b> 손대지 마세요.</li>
+    <li>자동 잠금 시간(설정에서 확인, 보통 30초~2분)이 지나도 <b>화면이 안 꺼지면 성공</b>입니다.</li>
+    <li>일부러 전원 버튼을 눌러 끈 뒤 다시 켜면, 앱이 잠금을 <b>다시 잡는지</b>(재획득 횟수 증가) 봅니다.</li>
+    <li><b>로그 복사</b>를 눌러 채팅에 붙여넣어 주세요.</li>
+  </ol>
+  <div class="note">전원 버튼으로 직접 끄는 것은 Wake Lock이 막지 못합니다. 막는 것은 <b>가만히 뒀을 때의 자동 잠금</b>뿐입니다.</div>
+</div>
+
+<div class="card">
+  <h2>4 · 로그</h2>
+  <div id="log"></div>
+  <button id="btn-copy" class="ghost">로그 복사</button>
+</div>
+
+<div class="stamp">RESPOFLOV</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id) }
+  var logEl = $('log')
+  var state = { sentinel: null, started: 0, re: 0, hide: 0, timer: null }
+
+  function now() { var d = new Date(); var p = function (n) { return String(n).padStart(2, '0') }
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()) }
+
+  function log(msg, kind) {
+    var line = document.createElement('div')
+    line.innerHTML = '<span class="t">' + now() + '</span>  <span class="' + (kind || '') + '">' +
+      String(msg).replace(/</g, '&lt;') + '</span>'
+    logEl.appendChild(line)
+    logEl.scrollTop = logEl.scrollHeight
+  }
+
+  function env() {
+    var sec = window.isSecureContext
+    var sa = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+    var api = 'wakeLock' in navigator
+    $('e-sec').textContent = sec ? '예' : '아니오'
+    $('e-sec').className = sec ? 'ok' : 'bad'
+    $('e-sa').textContent = sa ? '예' : '아니오 (브라우저 탭)'
+    $('e-sa').className = sa ? 'ok' : 'warn'
+    $('e-api').textContent = api ? '있음' : '없음'
+    $('e-api').className = api ? 'ok' : 'bad'
+    $('e-ua').textContent = navigator.userAgent.slice(0, 74)
+    log('환경: secure=' + sec + ' standalone=' + sa + ' wakeLock=' + api)
+    log('UA: ' + navigator.userAgent)
+
+    var b = $('banner')
+    if (!api) {
+      b.hidden = false
+      b.innerHTML = '<h2 class="bad">이 브라우저는 Wake Lock을 지원하지 않습니다</h2>' +
+        '<div style="color:var(--tx2);font-size:12.5px">아이폰은 iOS 16.4+, 홈 화면 앱은 18.4+ 부터 지원합니다. ' +
+        '안드로이드는 Chrome 84+ 에서 됩니다. 지원하지 않는 기기에서는 홈코트가 이 기능을 자동으로 끕니다.</div>'
+    } else if (!sec) {
+      b.hidden = false
+      b.innerHTML = '<h2 class="bad">HTTPS가 아닙니다</h2>' +
+        '<div style="color:var(--tx2);font-size:12.5px">Wake Lock은 보안 컨텍스트에서만 동작합니다.</div>'
+    }
+  }
+
+  function paint() {
+    var held = !!state.sentinel && !state.sentinel.released
+    $('m-held').textContent = held ? '예' : '아니오'
+    $('m-held').className = held ? 'ok' : 'bad'
+    $('m-re').textContent = state.re
+    $('m-hide').textContent = state.hide
+    if (state.started) {
+      var s = Math.floor((Date.now() - state.started) / 1000)
+      var p = function (n) { return String(n).padStart(2, '0') }
+      $('m-elapsed').textContent = p(Math.floor(s / 60)) + ':' + p(s % 60)
+    }
+  }
+
+  function acquire(reason) {
+    if (!('wakeLock' in navigator)) { log('Wake Lock API가 없습니다', 'r'); return }
+    navigator.wakeLock.request('screen').then(function (s) {
+      state.sentinel = s
+      log('잠금 획득' + (reason ? ' (' + reason + ')' : ''), 'g')
+      s.addEventListener('release', function () {
+        log('잠금이 해제되었습니다 (시스템이 회수)', 'y')
+        paint()
+      })
+      paint()
+    }).catch(function (e) {
+      log('획득 실패: ' + e.name + ' — ' + e.message, 'r')
+      paint()
+    })
+  }
+
+  $('btn-on').onclick = function () {
+    if (!state.started) state.started = Date.now()
+    if (!state.timer) state.timer = setInterval(paint, 500)
+    acquire('사용자 시작')
+  }
+
+  $('btn-off').onclick = function () {
+    if (state.sentinel) state.sentinel.release()
+    state.sentinel = null
+    state.started = 0
+    if (state.timer) { clearInterval(state.timer); state.timer = null }
+    $('m-elapsed').textContent = '00:00'
+    log('해제했습니다')
+    paint()
+  }
+
+  $('btn-copy').onclick = function () {
+    var text = logEl.innerText
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { log('로그를 복사했습니다') })
+    else log('복사를 지원하지 않는 브라우저입니다', 'r')
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') {
+      state.hide++
+      log('>> 화면 꺼짐 또는 앱 전환', 'y')
+    } else {
+      log('<< 돌아옴')
+      // 백그라운드에 다녀오면 시스템이 잠금을 회수한다. 다시 잡아야 한다.
+      if (state.started && (!state.sentinel || state.sentinel.released)) {
+        state.re++
+        acquire('복귀 후 재획득')
+      }
+    }
+    paint()
+  })
+
+  env()
+  paint()
+})()
+</script>
+</body>
+</html>

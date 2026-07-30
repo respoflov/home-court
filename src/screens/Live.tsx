@@ -73,7 +73,9 @@ export function Live({
   }, [i, done, step?.seconds])
 
   useEffect(() => {
-    if (done || paused || feelFor || raiseFor) return
+    // 피드백 시트가 떠 있어도 휴식 시계는 계속 간다 (안내 문구가 그렇게 약속한다).
+    // 무게 올리기 제안만은 결정이 필요하므로 잠시 멈춘다.
+    if (done || paused || raiseFor) return
     const id = setInterval(() => {
       const left = Math.max(0, (deadline.current - Date.now()) / 1000)
       setRemain(left)
@@ -86,7 +88,7 @@ export function Live({
     }, 100)
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [i, paused, done, feelFor, raiseFor, settings.sound, settings.countdown])
+  }, [i, paused, done, raiseFor, settings.sound, settings.countdown])
 
   const finishSession = useCallback(() => {
     const secs = Math.round((Date.now() - startedAt.current.getTime()) / 1000)
@@ -111,6 +113,9 @@ export function Live({
     const at = iRef.current
     const cur = steps[at]
     if (!cur) return
+
+    // 휴식이 끝나면 아직 열려 있는 피드백 시트를 닫는다
+    if (cur.kind === 'rest') setFeelFor(null)
 
     // 세트를 마쳤고 무게가 붙는 동작이면 휴식 중에 한 번 묻는다
     if (cur.kind === 'work' && cur.askFeel && steps[at + 1]?.kind === 'rest') {

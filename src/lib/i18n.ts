@@ -190,6 +190,11 @@ const D = {
   monday: ['월요일', 'Monday'],
   sunday: ['일요일', 'Sunday'],
   keepAwake: ['운동 중 화면 켜두기', 'Keep screen on'],
+  keepAwakeUnsupported: [
+    '이 브라우저는 화면 켜두기를 지원하지 않습니다',
+    'This browser cannot keep the screen on',
+  ],
+  keepAwakeSupported: ['이 기기에서 지원됩니다', 'Supported on this device'],
   keepAwakeSub: ['자동 잠금을 막습니다. 배터리를 더 씁니다', 'Prevents auto-lock. Uses more battery'],
   dumbbellWeights: ['덤벨 무게', 'Dumbbell weights'],
   dumbbellSub: ['부위별 현재 무게 · 자동 올리기 제안', 'Current weights and automatic step-ups'],
@@ -248,6 +253,27 @@ const D = {
   know1: ['정해진 횟수의 마지막 2~3회가 버거우면 맞다', 'The last two or three reps should feel tough'],
   know2: ['끝까지 여유로우면 가벼우니 한 단계 올린다', 'If it stays easy, go up a step'],
   know3: ['자세가 무너지면 무거우니 바로 내린다', 'If your form breaks, come back down'],
+  awkwardTitle: ['무게가 딱 맞지 않을 때', 'When no weight fits'],
+  awkward1: [
+    '고정 무게만 있어 중간이 없다면 가벼운 쪽을 고르고 횟수를 2~3회 늘린다',
+    'If only fixed weights are on hand, take the lighter one and add two or three reps',
+  ],
+  awkward2: [
+    '그래도 가벼우면 내리는 동작을 3초에 걸쳐 천천히 한다. 무게보다 시간이 자극을 만든다',
+    'Still light? Lower over three slow seconds. Time under load does the work, not just the number',
+  ],
+  awkward3: [
+    '양손으로 하던 동작을 한 손씩 나눠 하면 한쪽이 받는 무게가 두 배가 된다',
+    'Split a two-handed move into one hand at a time and that side carries twice the load',
+  ],
+  awkward4: [
+    '무거운 쪽밖에 없다면 횟수를 6~8회로 줄이고 세트를 하나 더 한다. 자세가 흔들리면 바로 멈춘다',
+    'Only a heavier one? Drop to six to eight reps and add a set. Stop the moment your form slips',
+  ],
+  awkwardNote: [
+    '어느 쪽이든 세트 피드백만 눌러두면 앱이 알아서 맞춰갑니다.',
+    'Either way, keep tapping the set feedback and the app will settle on the right number.',
+  ],
   weightAutoNote: [
     '운동할 때마다 "이 세트 어땠나요?"를 한 번 탭하면, 앱이 알아서 올릴 때를 알려줍니다.',
     'Tap "How was that set?" as you go and the app tells you when to add weight.',

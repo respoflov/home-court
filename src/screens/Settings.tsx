@@ -20,6 +20,7 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
   const [toast, setToast] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const wakeSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator
   const cycle = <T,>(cur: T, list: T[]) => list[(list.indexOf(cur) + 1) % list.length]
   const themeLabel = { light: t('themeLight'), system: t('themeSystem'), dark: t('themeDark') }[settings.theme]
 
@@ -78,8 +79,13 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
           <SItem label={t('weekStart')} sub={t('weekStartSub')}
                  value={settings.weekStart === 1 ? t('monday') : t('sunday')}
                  onClick={() => setSettings({ weekStart: settings.weekStart === 1 ? 0 : 1 })} />
-          <SItem label={t('keepAwake')} sub={t('keepAwakeSub')} toggle={settings.keepAwake}
-                 onToggle={(v) => setSettings({ keepAwake: v })} />
+          {/* 지원 여부를 숨기지 않는다 — 안 되는 기기에서 켜두면 되는 줄 안다 */}
+          <SItem
+            label={t('keepAwake')}
+            sub={`${t('keepAwakeSub')} · ${wakeSupported ? t('keepAwakeSupported') : t('keepAwakeUnsupported')}`}
+            toggle={settings.keepAwake && wakeSupported}
+            onToggle={(v) => setSettings({ keepAwake: v })}
+          />
           <SItem label={t('dumbbellWeights')} sub={t('dumbbellSub')}
                  value={`${data.weights.arm} · ${data.weights.torso} · ${data.weights.leg}kg`}
                  onClick={() => onGo('weights')} last />
@@ -119,7 +125,7 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
           <SItem label={t('aboutApp')} sub={t('aboutSub')} onClick={() => onGo('about')} />
           <SItem label={t('safety')} sub={t('safetySub')} onClick={() => onGo('safety')} />
           <SItem label={t('licenses')} sub="Pretendard · Lucide" onClick={() => onGo('licenses')} />
-          <SItem label={t('version')} value="1.0.0" last />
+          <SItem label={t('version')} value={__APP_VERSION__} last />
         </SBox>
       </div>
 
@@ -303,6 +309,13 @@ function WeightsPage() {
         <Li>{t('know1')}</Li>
         <Li>{t('know2')}</Li>
         <Li>{t('know3')}</Li>
+      </Block>
+      <Block title={t('awkwardTitle')}>
+        <Li>{t('awkward1')}</Li>
+        <Li>{t('awkward2')}</Li>
+        <Li>{t('awkward3')}</Li>
+        <Li>{t('awkward4')}</Li>
+        <span className="mt-3 block">{t('awkwardNote')}</span>
       </Block>
       <div className="mt-2 rounded-[12px] px-[14px] py-3 text-[12px] leading-[1.6]"
            style={{ background: 'var(--buzzer-soft)', color: 'var(--buzzer)' }}>

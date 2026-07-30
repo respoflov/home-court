@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import type { Noise } from '@/lib/types'
@@ -29,7 +29,12 @@ export function NoiseMark({ level, className = '' }: { level: Noise; className?:
   )
 }
 
-/* ── 바텀시트 ───────────────────────────────────────── */
+/* ── 바텀시트 ─────────────────────────────────────────
+   아래에서 올라온 것이니 아래로 밀면 닫혀야 한다.
+   손잡이 영역만 드래그를 받는다 — 시트 안의 버튼·스크롤과 경합하지 않게. */
+const CLOSE_PX = 90
+const CLOSE_VELOCITY = 0.55
+
 export function Sheet({
   open,
   onClose,
@@ -41,8 +46,18 @@ export function Sheet({
   children: ReactNode
   dismissable?: boolean
 }) {
+  const [dy, setDy] = useState(0)
+  const [closing, setClosing] = useState(false)
+  /** 진입 애니메이션은 fill-mode:both라 끝난 뒤에도 transform을 붙잡는다.
+      끝나면 클래스를 떼야 드래그의 인라인 transform이 먹는다. */
+  const [entered, setEntered] = useState(false)
+  const drag = useRef<{ y: number; t: number } | null>(null)
+
   useEffect(() => {
     if (!open) return
+    setDy(0)
+    setClosing(false)
+    setEntered(false)
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
@@ -50,23 +65,70 @@ export function Sheet({
     }
   }, [open])
 
+  const onDown = (e: React.PointerEvent) => {
+    if (!dismissable) return
+    drag.current = { y: e.clientY, t: Date.now() }
+    setClosing(false)
+  }
+
+  useEffect(() => {
+    if (!open || !dismissable) return
+    const move = (e: PointerEvent) => {
+      if (!drag.current) return
+      // 위로는 끌리지 않는다 — 시트는 아래로만 닫힌다
+      setDy(Math.max(0, e.clientY - drag.current.y))
+    }
+    const up = (e: PointerEvent) => {
+      const d = drag.current
+      drag.current = null
+      if (!d) return
+      const dist = Math.max(0, e.clientY - d.y)
+      const v = dist / Math.max(1, Date.now() - d.t)
+      if (dist > CLOSE_PX || v > CLOSE_VELOCITY) {
+        setClosing(true)
+        setTimeout(() => onClose?.(), 180)
+      } else {
+        setDy(0)
+      }
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+    return () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+    }
+  }, [open, dismissable, onClose])
+
   if (!open) return null
+  const dragging = drag.current !== null
   return createPortal(
     <div
       className="dim-in fixed inset-0 z-50 flex items-end"
-      style={{ background: 'var(--sheet-dim)' }}
+      style={{ background: 'var(--sheet-dim)', opacity: closing ? 0 : 1, transition: closing ? 'opacity .18s' : undefined }}
       onClick={dismissable ? onClose : undefined}
     >
       <div
-        className="sheet-up w-full rounded-t-[24px] border-t px-[22px] pt-[10px]"
+        className={`${entered ? '' : 'sheet-up'} w-full rounded-t-[24px] border-t px-[22px] pt-[4px]`}
+        onAnimationEnd={() => setEntered(true)}
         style={{
           background: 'var(--surface)',
           borderColor: 'var(--line)',
           paddingBottom: 'max(32px, env(safe-area-inset-bottom))',
+          transform: closing ? 'translateY(100%)' : dy ? `translateY(${dy}px)` : undefined,
+          transition: dragging ? 'none' : 'transform .22s cubic-bezier(.23,1,.32,1)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mx-auto mb-[18px] h-1 w-9 rounded-full" style={{ background: 'var(--line-2)' }} />
+        <div
+          className="mx-auto mb-[14px] flex h-[30px] w-full items-center justify-center"
+          style={{ touchAction: 'none', cursor: dismissable ? 'grab' : 'default' }}
+          onPointerDown={onDown}
+          aria-hidden
+        >
+          <span className="h-1 w-9 rounded-full" style={{ background: 'var(--line-2)' }} />
+        </div>
         {children}
       </div>
     </div>,

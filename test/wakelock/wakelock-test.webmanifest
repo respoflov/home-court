@@ -1,0 +1,10 @@
+{
+  "name": "화면 켜두기 테스트 · 홈코트",
+  "short_name": "WakeLock 테스트",
+  "description": "홈코트의 '운동 중 화면 켜두기'가 실제로 자동 잠금을 막는지 실기기에서 확인하는 도구",
+  "start_url": "wakelock-test.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#0B0E15",
+  "theme_color": "#0B0E15"
+}
