@@ -34,6 +34,11 @@
 - 바텀시트: r24 상단, grab 36×4, dim rgba(4,6,10,.72)
 - 드래그 잡힘: buzzer 보더 + lift + scale(1.015), 놓일 자리는 44px 점선
 
+## 동작 그림 (Figure)
+- 120×120 · 몸통 8 / 팔다리 6 / 먼쪽 6+opacity.3 / 머리 r9 stroke5.5 / 발 stroke5.5 / 바닥 3.5
+- 앰버는 운동당 하나만. 목록 정지, 운동 중만 2.6s 교차. `figureOff`로 동작 단위 끄기
+- 크기: 운동 중 136 · 동작 시트 92 · 루틴 편집 26~30 · 플레이북 34
+
 ## 절차 메모
 - 승인 과정 시안은 mockup/design-mockup-v1~v4.html에 전부 보존 (덮어쓰기 금지)
 - 톤 참고: 로컬 _references/awesome-design-md의 raycast, linear.app에서 다크 서피스 사다리 + 헤어라인 보더 + 단일 액센트 구조만 취함

@@ -3,6 +3,7 @@ import { exName, rtName, useStore } from '@/lib/store'
 import type { Exercise, Routine, SlotRef } from '@/lib/types'
 import { Cta, Field, NoiseMark, ScreenHead, Sheet, TextInput } from '@/components/bits'
 import { moved, useReorder } from '@/lib/reorder'
+import { Figure } from '@/components/Figure'
 import { secondsFor } from '@/lib/session'
 import { mmss } from '@/lib/time'
 
@@ -88,6 +89,7 @@ export function RoutineEdit({ routine, onBack }: { routine: Routine; onBack: () 
                 className="flex w-full items-center gap-3 border-b py-3 text-left"
                 style={{ borderColor: 'var(--line)' }}
               >
+                <Figure id={x.id} size={30} />
                 <NoiseMark level={x.noise} />
                 <span className="min-w-0 flex-1 text-[14px] font-medium">{exName(x, lang)}</span>
                 <span className="tnum shrink-0 text-[12px]" style={{ color: 'var(--ink-3)' }}>
@@ -177,6 +179,7 @@ function QuarterBlock({
                     style={{ color: grabbed ? 'var(--buzzer)' : 'var(--ink-4)' }} aria-hidden>
                 ⋮⋮
               </span>
+              <Figure id={x.id} size={26} className="shrink-0" />
               <span className="min-w-0 flex-1 truncate text-[14px] font-medium">{exName(x, lang)}</span>
               <span className="tnum shrink-0 text-[12px]" style={{ color: 'var(--ink-3)' }}>
                 {x.mode === 'time' ? mmss(secondsFor(x, amount)) : `${amount}${lang === 'ko' ? t('reps') : ''}`}

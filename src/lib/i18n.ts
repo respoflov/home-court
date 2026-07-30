@@ -42,6 +42,10 @@ const D = {
 
   // 운동 중
   upNext: ['다음', 'Up next'],
+  watchOut: ['주의', 'Watch out'],
+  figureOn: ['자세 그림 보기', 'Show the form figure'],
+  figureOff: ['자세 그림 끄기', 'Hide the form figure'],
+  figureHint: ['이 동작에만 적용됩니다', 'Applies to this move only'],
   switchingSoon: ['곧 전환됩니다', 'Switching soon'],
   reps: ['회', 'reps'],
   setOf: ['세트 중', 'Set'],

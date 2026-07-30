@@ -83,6 +83,33 @@
   input, select, textarea { font-family: inherit; }
 }
 
+/* ── 동작 그림 ─────────────────────────────────────
+   규격은 src/data/figures.ts 머리말에. 여기서 벗어나면 42개가 제각각이 된다. */
+.fig g { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fig .ts { stroke: var(--ink-2); stroke-width: 8; }
+.fig .lb { stroke: var(--ink-2); stroke-width: 6; }
+.fig .fr { stroke: var(--ink-2); stroke-width: 6; opacity: .3; }
+.fig .hd { stroke: var(--ink-2); stroke-width: 5.5; fill: none; }
+.fig .ft { stroke: var(--ink-2); stroke-width: 5.5; }
+.fig .cu { stroke: var(--buzzer); stroke-width: 6; }
+.fig .ld { fill: var(--buzzer); stroke: none; }
+.fig .gr2 { stroke: var(--line-2); stroke-width: 3.5; fill: none; }
+.fig > .gr { stroke: var(--line-2); stroke-width: 3.5; fill: none; }
+.fig .fB { opacity: 0; }
+
+/* 두 자세 교차는 운동 중 화면에서만. 목록에서 여럿이 동시에 움직이면 산만하다. */
+.fig-anim .fA { animation: figSwap 2.6s infinite; }
+.fig-anim .fB { animation: figSwap 2.6s infinite; animation-delay: 1.3s; }
+@keyframes figSwap {
+  0%, 42% { opacity: 1 }
+  50%, 92% { opacity: 0 }
+  100% { opacity: 1 }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fig-anim .fA { animation: none; opacity: 1 }
+  .fig-anim .fB { animation: none; opacity: 0 }
+}
+
 /* 큰 글씨 모드 — 운동 중 화면의 숫자·동작명에만 적용 */
 :root[data-big="on"] { --live-scale: 1.14; }
 :root { --live-scale: 1; }

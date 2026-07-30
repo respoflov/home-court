@@ -36,6 +36,8 @@ jobs:
           mkdir -p dist/test/gps dist/test/wakelock
           cp test/gps/gps-test.html test/gps/gps-test.webmanifest dist/test/gps/
           cp test/wakelock/wakelock-test.html test/wakelock/wakelock-test.webmanifest dist/test/wakelock/
+          mkdir -p dist/test/figures
+          cp test/figures/contact-sheet.html dist/test/figures/
 
       - uses: actions/upload-pages-artifact@v3
         with:

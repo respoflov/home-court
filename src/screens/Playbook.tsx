@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
-import { exName, rtName, useStore } from '@/lib/store'
+import { exName, exWarn, rtName, useStore } from '@/lib/store'
 import type { Exercise, Part, Routine } from '@/lib/types'
 import { Badge, Cta, GroupLabel, NoiseMark, ScreenHead, Sheet } from '@/components/bits'
 import { buildSteps, totalSeconds } from '@/lib/session'
+import { Figure } from '@/components/Figure'
 
 const PARTS: Part[] = ['warmup', 'core', 'lower', 'upper', 'cardio', 'cooldown']
 
@@ -158,7 +159,8 @@ export function Playbook({
               className="flex w-full items-center gap-3 border-b py-[13px] text-left"
               style={{ borderColor: 'var(--line)', opacity: x.hidden ? 0.4 : 1 }}
             >
-              <span className="w-[22px] shrink-0 text-center"><NoiseMark level={x.noise} /></span>
+              <span className="shrink-0"><Figure id={x.id} size={34} /></span>
+              <span className="w-[16px] shrink-0"><NoiseMark level={x.noise} /></span>
               <span className="min-w-0 flex-1">
                 <span className="text-[14.5px] font-semibold">
                   {exName(x, lang)}
@@ -188,9 +190,19 @@ export function Playbook({
         {menu && (
           <>
             <h3 className="text-[20px] font-bold tracking-[-0.02em]">{exName(menu, lang)}</h3>
-            <p className="mt-2 text-[13px] leading-[1.65]" style={{ color: 'var(--ink-2)' }}>
-              {lang === 'ko' ? menu.cueKo : menu.cueEn}
-            </p>
+            <div className="mt-3 flex items-start gap-4">
+              <Figure id={menu.id} size={92} animate />
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] leading-[1.65]" style={{ color: 'var(--ink-2)' }}>
+                  {lang === 'ko' ? menu.cueKo : menu.cueEn}
+                </p>
+                {exWarn(menu, lang) && (
+                  <p className="mt-[10px] text-[12px] leading-[1.55]" style={{ color: 'var(--ink-2)' }}>
+                    <b style={{ color: 'var(--buzzer)' }}>{t('watchOut')}</b> {exWarn(menu, lang)}
+                  </p>
+                )}
+              </div>
+            </div>
             <div className="mt-5 flex flex-col gap-2">
               {!menu.builtin && <Cta ghost onClick={() => { setMenu(null); onEditExercise(menu) }}>{t('edit')}</Cta>}
               {menu.builtin ? (

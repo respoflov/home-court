@@ -17,6 +17,9 @@ export interface Exercise {
   nameEn: string
   cueKo: string
   cueEn: string
+  /** 자세가 이렇게 되면 안 된다는 주의 한 문장. 첫 세트에서만 보여준다. */
+  warnKo?: string
+  warnEn?: string
   part: Part
   noise: Noise
   gear: Gear[]
@@ -134,4 +137,6 @@ export interface AppData {
   awayWeek: number
   onboarded: boolean
   installSeen: boolean
+  /** 운동 중 화면에서 그림을 끈 운동 id. 루틴 전체가 아니라 동작 하나 단위다. */
+  figureOff: string[]
 }

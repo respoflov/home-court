@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { exCue, exName, useStore } from '@/lib/store'
+import { exCue, exName, exWarn, useStore } from '@/lib/store'
 import type { Step } from '@/lib/session'
 import { totalSeconds } from '@/lib/session'
 import type { Exercise, Feel, SessionLog } from '@/lib/types'
@@ -8,6 +8,7 @@ import { weightFor } from '@/lib/weights'
 import * as sound from '@/lib/sound'
 import * as wake from '@/lib/wakelock'
 import { Cta, Sheet } from '@/components/bits'
+import { Figure, hasFigure } from '@/components/Figure'
 
 /**
  * 이 앱의 승부처. 폰은 바닥에 있고 사용자는 1.5m 밖에서 곁눈질한다.
@@ -30,7 +31,7 @@ export function Live({
   size?: 'timeout' | 'standard' | 'full'
   onExit: (completed: boolean) => void
 }) {
-  const { t, lang, data, addLog, recordFeel, raiseWeight } = useStore()
+  const { t, lang, data, addLog, recordFeel, raiseWeight, figureShown, toggleFigure } = useStore()
   const { settings, weights } = data
 
   const [i, setI] = useState(0)
@@ -193,6 +194,9 @@ export function Live({
   const name = exName(step.exercise, lang)
   const sideLabel = step.side ? (step.side === 'left' ? t('left') : t('right')) : null
 
+  const showFigure = figureShown(step.exercise.id)
+  const warn = exWarn(step.exercise, lang)
+
   // 휴식은 건너뛰고 실제 다음 동작을 보여준다 — 쉬는 동안 뭘 준비할지 알아야 한다
   const upNext = steps.slice(i + 1).find((s) => s.kind === 'work')
   const upNextName = upNext
@@ -240,6 +244,39 @@ export function Live({
         </div>
 
         <div className="flex flex-1 flex-col items-center justify-center">
+          {/* 자세 그림 — 이 동작에만 적용되는 토글. 끄면 타이머가 원래 크기로 돌아온다. */}
+          {!isRest && hasFigure(step.exercise.id) && (
+            <div className="relative mb-1 inline-block">
+              {showFigure ? (
+                <>
+                  <Figure id={step.exercise.id} size={136} animate />
+                  <button
+                    onClick={() => toggleFigure(step.exercise.id)}
+                    aria-label={t('figureOff')}
+                    className="press absolute -top-2 -right-9 grid h-11 w-11 place-items-center rounded-full"
+                    style={{ color: 'var(--ink-4)' }}
+                  >
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M3 3l18 18" />
+                      <path d="M10.6 5.1A9 9 0 0 1 12 5c5 0 9 4.5 9 7a12 12 0 0 1-2.2 3.2" />
+                      <path d="M6.5 6.6C4.2 8 2.7 10.2 2.7 12c0 2.5 4 7 9.3 7 1.4 0 2.7-.3 3.9-.8" />
+                      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                    </svg>
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => toggleFigure(step.exercise.id)}
+                  className="press mb-1 rounded-full border px-[13px] py-[7px] text-[11.5px] font-semibold"
+                  style={{ borderColor: 'var(--line)', color: 'var(--ink-4)' }}
+                >
+                  {t('figureOn')}
+                </button>
+              )}
+            </div>
+          )}
+
           <div
             className="text-center font-semibold tracking-[-0.02em]"
             style={{ fontSize: 'calc(26px * var(--live-scale))' }}
@@ -253,8 +290,11 @@ export function Live({
           </div>
 
           <div
-            className="tnum my-[26px] leading-none font-extrabold tracking-[-0.055em]"
-            style={{ fontSize: 'calc(104px * var(--live-scale))', color: hot ? 'var(--buzzer-hot)' : 'var(--ink)' }}
+            className="tnum my-[18px] leading-none font-extrabold tracking-[-0.055em]"
+            style={{
+              fontSize: `calc(${showFigure && !isRest ? 84 : 104}px * var(--live-scale))`,
+              color: hot ? 'var(--buzzer-hot)' : 'var(--ink)',
+            }}
           >
             {mmss(remain)}
           </div>
@@ -287,6 +327,17 @@ export function Live({
               style={{ color: 'var(--ink-3)' }}
             >
               {exCue(step.exercise, lang)}
+            </div>
+          )}
+
+          {/* 주의는 첫 세트에서만. 매 세트 반복하면 잔소리가 되고 결국 안 읽는다. */}
+          {!isRest && step.setIndex === 0 && step.side !== 'right' && warn && (
+            <div
+              className="mt-[10px] flex max-w-[280px] items-start gap-[6px] text-left text-[12px] leading-[1.5]"
+              style={{ color: 'var(--buzzer)' }}
+            >
+              <span className="mt-[1px] shrink-0 font-bold">{t('watchOut')}</span>
+              <span style={{ color: 'var(--ink-2)' }}>{warn}</span>
             </div>
           )}
         </div>

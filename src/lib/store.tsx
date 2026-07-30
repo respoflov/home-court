@@ -41,6 +41,7 @@ const EMPTY: AppData = {
   awayWeek: 1,
   onboarded: false,
   installSeen: false,
+  figureOff: [],
 }
 
 function load(): AppData {
@@ -81,6 +82,9 @@ interface Ctx {
   exportBackup: () => void
   importBackup: (file: File) => Promise<boolean>
   resetAll: () => void
+  /** 이 동작을 운동 중에 그림으로 보여줄지 */
+  figureShown: (id: string) => boolean
+  toggleFigure: (id: string) => void
 }
 
 const C = createContext<Ctx | null>(null)
@@ -216,6 +220,14 @@ export function Store({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const figureShown = useCallback((id: string) => !data.figureOff.includes(id), [data.figureOff])
+  const toggleFigure = useCallback((id: string) => {
+    setData((d) => ({
+      ...d,
+      figureOff: d.figureOff.includes(id) ? d.figureOff.filter((x) => x !== id) : [...d.figureOff, id],
+    }))
+  }, [])
+
   const resetAll = useCallback(() => {
     localStorage.removeItem(KEY)
     setData(EMPTY)
@@ -228,11 +240,12 @@ export function Store({ children }: { children: ReactNode }) {
       data, set, setSettings, lang, t,
       allExercises, exerciseById, allRoutines, routineById,
       quietNow, addLog, recordFeel, raiseWeight, resetFeel,
-      exportBackup, importBackup, resetAll,
+      exportBackup, importBackup, resetAll, figureShown, toggleFigure,
     }),
     [
       data, set, setSettings, lang, t, allExercises, exerciseById, allRoutines, routineById,
       quietNow, addLog, recordFeel, raiseWeight, resetFeel, exportBackup, importBackup, resetAll,
+      figureShown, toggleFigure,
     ],
   )
 
@@ -251,6 +264,9 @@ export function exName(x: Exercise, lang: Lang) {
 }
 export function exCue(x: Exercise, lang: Lang) {
   return lang === 'ko' ? x.cueKo : x.cueEn
+}
+export function exWarn(x: Exercise, lang: Lang) {
+  return lang === 'ko' ? x.warnKo : x.warnEn
 }
 export function rtName(r: Routine, lang: Lang) {
   return lang === 'ko' ? r.nameKo : r.nameEn
