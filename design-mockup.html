@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>홈코트 — 디자인 시안 v1</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{
+  /* ── 다크 (기본 · 새벽 6시) ─────────────────────────── */
+  --void:#0B0E15;        /* 창밖 여명의 짙은 남색 = 캔버스 */
+  --surface:#12161F;     /* 요가 매트 = 카드 */
+  --raised:#1A1F2A;      /* 한 단 위 */
+  --line:rgba(233,238,247,.09);
+  --line-2:rgba(233,238,247,.16);
+  --ink:#E9EEF7;
+  --ink-2:rgba(233,238,247,.62);
+  --ink-3:rgba(233,238,247,.40);
+  --ink-4:rgba(233,238,247,.24);
+  --buzzer:#FFA31A;              /* 스코어보드 LED 앰버 = 단일 액센트 */
+  --buzzer-hot:#FF4D2E;          /* 전환 3초 전 — 같은 계열, 온도만 상승 */
+  --buzzer-soft:rgba(255,163,26,.13);
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#07090E;color:var(--ink);font-family:var(--font);
+  -webkit-font-smoothing:antialiased;padding:40px 32px 80px;
+}
+
+/* ── 문서 크롬 ─────────────────────────────────────── */
+.doc{max-width:1360px;margin:0 auto}
+.doc h1{font-size:30px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+.doc h1 em{font-style:normal;color:var(--buzzer)}
+.doc .sub{color:var(--ink-3);font-size:13px;margin-top:6px}
+.changes{
+  margin-top:22px;padding:18px 20px;background:var(--surface);
+  border:1px solid var(--line);border-radius:14px;max-width:760px;
+}
+.changes b{display:block;font-size:11px;letter-spacing:.09em;color:var(--ink-3);margin-bottom:10px}
+.changes ul{margin-left:16px;font-size:13.5px;line-height:1.75;color:var(--ink-2)}
+.changes li strong{color:var(--ink);font-weight:600}
+.changes li::marker{color:var(--buzzer)}
+
+section{margin-top:56px}
+section > h2{
+  font-size:11px;font-weight:700;letter-spacing:.11em;color:var(--ink-3);
+  padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:8px;
+}
+section > .ask{font-size:14px;color:var(--ink-2);margin:14px 0 26px;max-width:720px;line-height:1.65;text-wrap:pretty}
+section > .ask b{color:var(--buzzer);font-weight:600}
+
+.row{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.item{display:flex;flex-direction:column;gap:12px}
+.cap{font-size:12px;color:var(--ink-3);max-width:375px;line-height:1.6}
+.cap b{display:block;color:var(--ink);font-size:13px;font-weight:600;margin-bottom:3px}
+.cap .pick{color:var(--buzzer);font-weight:600}
+
+/* ── 폰 프레임 (실측 375×812) ───────────────────────── */
+.phone{
+  width:375px;height:812px;border-radius:40px;background:var(--void);
+  position:relative;overflow:hidden;border:1px solid var(--line-2);
+  display:flex;flex-direction:column;
+}
+.phone.light{background:#F7F5F1;color:#14171F}
+.notch{
+  position:absolute;top:9px;left:50%;transform:translateX(-50%);
+  width:112px;height:28px;border-radius:20px;background:#000;z-index:40;
+}
+.statusbar{
+  position:absolute;top:16px;left:0;right:0;z-index:39;
+  display:flex;justify-content:space-between;padding:0 30px;
+  font-size:12px;font-weight:600;color:var(--ink-2);
+}
+.light .statusbar{color:rgba(20,23,31,.55)}
+
+/* ── 공통 ─────────────────────────────────────────── */
+.tabbar{
+  margin-top:auto;display:flex;border-top:1px solid var(--line);
+  padding:9px 6px 26px;background:var(--void);position:relative;z-index:20;
+}
+.tabbar div{flex:1;text-align:center;font-size:10px;color:var(--ink-4);display:flex;flex-direction:column;align-items:center;gap:5px}
+.tabbar div.on{color:var(--buzzer)}
+.tabbar svg{width:19px;height:19px;stroke-width:1.8;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+
+.stamp{
+  position:absolute;left:0;right:0;bottom:34px;text-align:center;
+  font-size:9.5px;font-weight:600;letter-spacing:.32em;text-indent:.32em;
+  color:var(--ink-4);
+}
+
+.badge{
+  display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;
+  background:var(--buzzer-soft);color:var(--buzzer);font-size:11px;font-weight:600;
+}
+.badge.mute{background:rgba(233,238,247,.06);color:var(--ink-3)}
+
+/* ── 운동 중 ──────────────────────────────────────── */
+.live{flex:1;display:flex;flex-direction:column;position:relative;padding:64px 28px 30px}
+.ring-border{position:absolute;inset:0;z-index:5;pointer-events:none}
+.ring-border rect{fill:none;stroke-linecap:round}
+
+.live-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:10}
+.q{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--ink-3)}
+.q em{font-style:normal;color:var(--buzzer)}
+.q-count{font-size:11px;font-weight:600;color:var(--ink-4);font-variant-numeric:tabular-nums}
+
+.live-mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;position:relative;z-index:10}
+.ex-name{font-size:26px;font-weight:600;letter-spacing:-.02em;text-align:center}
+.ex-cue{font-size:13px;color:var(--ink-3);text-align:center;margin-top:9px;line-height:1.55;max-width:270px;text-wrap:pretty}
+.clock{
+  font-size:104px;font-weight:800;letter-spacing:-.055em;line-height:1;
+  font-variant-numeric:tabular-nums;margin:26px 0 4px;
+}
+.clock.hot{color:var(--buzzer-hot)}
+.reps{font-size:15px;font-weight:500;color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+.live-bot{position:relative;z-index:10;display:flex;flex-direction:column;gap:20px;align-items:center}
+.next{font-size:12.5px;color:var(--ink-3)}
+.next b{color:var(--ink-2);font-weight:600}
+.pause{
+  width:60px;height:60px;border-radius:999px;border:1px solid var(--line-2);
+  background:var(--surface);display:grid;place-items:center;
+}
+.pause svg{width:20px;height:20px;stroke:var(--ink-2);stroke-width:2;fill:none;stroke-linecap:round}
+
+/* 중앙 링 대안(B안) */
+.dial{position:relative;width:246px;height:246px;display:grid;place-items:center;margin:12px 0}
+.dial svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.dial .clock{font-size:66px;margin:0}
+
+/* ── 오늘 ─────────────────────────────────────────── */
+.scr{flex:1;padding:60px 20px 0;display:flex;flex-direction:column;overflow:hidden}
+.scr-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+.date{font-size:13px;color:var(--ink-3)}
+.date b{display:block;color:var(--ink);font-size:20px;font-weight:700;letter-spacing:-.02em;margin-top:3px}
+
+.hero{
+  background:var(--surface);border:1px solid var(--line);border-radius:20px;
+  padding:22px 20px 20px;
+}
+.hero .lbl{font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--ink-3)}
+.hero .title{font-size:30px;font-weight:700;letter-spacing:-.03em;margin-top:10px}
+.hero .meta{font-size:13px;color:var(--ink-2);margin-top:7px;font-variant-numeric:tabular-nums}
+.hero .quarters{display:flex;gap:5px;margin-top:16px}
+.hero .quarters span{flex:1;height:3px;border-radius:2px;background:var(--line-2)}
+.hero .quarters span.f{background:var(--buzzer)}
+.hero .quarters span.c{background:rgba(255,163,26,.32)}
+.cta{
+  margin-top:18px;width:100%;padding:17px;border-radius:14px;border:0;
+  background:var(--buzzer);color:#140C00;font:700 17px/1 var(--font);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.cta svg{width:17px;height:17px;fill:currentColor}
+
+.seg{display:flex;gap:6px;margin-top:14px}
+.seg button{
+  flex:1;padding:11px 4px;border-radius:11px;border:1px solid var(--line);
+  background:transparent;color:var(--ink-3);font:600 12px/1.45 var(--font);
+}
+.seg button em{display:block;font-style:normal;font-size:10.5px;font-weight:500;color:var(--ink-4);margin-top:3px}
+.seg button.on{border-color:var(--buzzer);color:var(--buzzer);background:var(--buzzer-soft)}
+.seg button.on em{color:var(--buzzer)}
+
+.mini{
+  margin-top:20px;padding:15px 17px;border:1px solid var(--line);border-radius:16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.mini .k{font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--ink-3)}
+.mini .v{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.03em;margin-top:4px}
+.mini .v small{font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:0}
+.mini-sep{width:1px;height:34px;background:var(--line)}
+
+/* ── 기록 ─────────────────────────────────────────── */
+.board{
+  background:var(--surface);border:1px solid var(--line);border-radius:20px;
+  padding:18px 20px 20px;
+}
+.board-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.board-top .m{font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--ink-3)}
+.board-grid{display:flex;align-items:flex-end;gap:16px}
+.side{flex:1}
+.side .k{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--ink-3)}
+.side .n{
+  font-size:52px;font-weight:800;line-height:.94;letter-spacing:-.05em;
+  font-variant-numeric:tabular-nums;color:var(--buzzer);margin-top:5px;
+}
+.side.away .n{color:var(--ink-2)}
+.side .s{font-size:11px;color:var(--ink-4);margin-top:5px}
+.board-sep{width:1px;align-self:stretch;background:var(--line);margin:2px 0}
+.pct{margin-top:17px;padding-top:15px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+.pct .k{font-size:11.5px;color:var(--ink-3)}
+.pct .v{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+
+.heat{margin-top:20px}
+.heat-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px}
+.heat-head .t{font-size:13px;font-weight:600}
+.heat-head .l{font-size:10px;color:var(--ink-4);display:flex;align-items:center;gap:3px}
+.heat-head .l i{width:9px;height:9px;border-radius:2.5px;display:inline-block;margin-left:5px}
+.heat-head .l i:first-child{margin-left:0}
+.heat-head .l i.d1{background:rgba(255,163,26,.30)}
+.heat-head .l i.d2{background:rgba(255,163,26,.55)}
+.heat-head .l i.d3{background:var(--buzzer)}
+.heat-head .l i.away{box-shadow:inset 0 0 0 1.5px rgba(255,163,26,.75)}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:6px}
+.dow span{text-align:center;font-size:9.5px;font-weight:600;color:var(--ink-4);letter-spacing:.02em}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.grid i{height:26px;border-radius:6px;background:rgba(233,238,247,.035)}
+.grid i.d1{background:rgba(255,163,26,.30)}
+.grid i.d2{background:rgba(255,163,26,.52)}
+.grid i.d3{background:var(--buzzer)}
+.grid i.away{background:transparent;box-shadow:inset 0 0 0 1.5px rgba(255,163,26,.75)}
+
+.logs{margin-top:22px;display:flex;flex-direction:column;gap:1px}
+.log{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}
+.log .dot{width:8px;height:8px;border-radius:999px;background:var(--buzzer);flex:0 0 auto}
+.log .dot.away{background:transparent;border:1.5px solid var(--buzzer)}
+.log .tx{flex:1;min-width:0}
+.log .tx b{display:block;font-size:14px;font-weight:600}
+.log .tx span{font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.log .rt{font-size:12px;color:var(--ink-4);font-variant-numeric:tabular-nums}
+
+/* ── 스플래시 ─────────────────────────────────────── */
+.splash{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.splash .wm{font-size:25px;font-weight:700;letter-spacing:-.02em}
+.splash .cf{font-size:13px;color:var(--ink-3)}
+
+/* ── 팔레트 ───────────────────────────────────────── */
+.sw{display:flex;flex-wrap:wrap;gap:10px;max-width:900px}
+.sw div{width:132px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.sw div .c{height:62px}
+.sw div .t{padding:9px 10px;font-size:10.5px;line-height:1.5}
+.sw div .t b{display:block;font-size:11.5px;font-weight:600;color:var(--ink)}
+.sw div .t code{color:var(--ink-3);font-size:10px;font-family:ui-monospace,Menlo,monospace}
+.sw div .t em{display:block;font-style:normal;color:var(--ink-4);margin-top:3px}
+
+.type-spec{max-width:520px;border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--surface)}
+.type-spec > div{display:flex;align-items:baseline;gap:14px;padding:9px 0;border-bottom:1px solid var(--line)}
+.type-spec > div:last-child{border:0}
+.type-spec .n{font-size:10px;color:var(--ink-4);width:118px;flex:0 0 auto;font-family:ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>홈코트 <em>— 디자인 시안 v1</em></h1>
+<div class="sub">2026-07-30 · 층간소음 적은 홈트 루틴 실행·기록 PWA · 화면은 실측 375×812</div>
+
+<div class="changes">
+  <b>이번 버전에서 정할 것</b>
+  <ul>
+    <li><strong>로고</strong> — 3안 중 택 1</li>
+    <li><strong>운동 중 화면의 타이머 형태</strong> — 테두리형(A) vs 중앙 링형(B). <em>이 앱에서 가장 중요한 결정입니다</em></li>
+    <li><strong>다크 기본</strong>이 맞는지 (아침 6시 어두운 방 전제)</li>
+    <li>앰버 단일 액센트가 맞는지</li>
+  </ul>
+</div>
+
+<!-- ══════════════ 1. 로고 ══════════════ -->
+<section>
+  <h2>1 · 로고 3안</h2>
+  <p class="ask">이름이 <b>홈코트</b>인 만큼 "집"과 "코트"를 어떻게 섞을지가 갈립니다. 앱 아이콘(둥근 사각) 안에 들어간 상태로 봐주세요.</p>
+  <div class="row">
+
+    <div class="item">
+      <div style="width:220px;height:220px;border-radius:48px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center">
+        <svg width="112" height="112" viewBox="0 0 48 48" fill="none">
+          <rect x="5" y="9" width="38" height="30" rx="5" stroke="rgba(233,238,247,.34)" stroke-width="2.4"/>
+          <path d="M5 18h10v12H5" stroke="rgba(233,238,247,.34)" stroke-width="2.4" stroke-linejoin="round"/>
+          <circle cx="15" cy="24" r="5.5" stroke="#FFA31A" stroke-width="2.8"/>
+          <path d="M43 17.5a6.5 6.5 0 0 0 0 13" stroke="rgba(233,238,247,.34)" stroke-width="2.4"/>
+        </svg>
+      </div>
+      <div class="cap"><b>A · 하프코트</b>어른스럽고 미니멀. 코트 라인만으로 정체성을 만든다. 다만 "집"이 안 보이고, 작게 줄이면 농구인지 알아보기 어려울 수 있다.</div>
+    </div>
+
+    <div class="item">
+      <div style="width:220px;height:220px;border-radius:48px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center">
+        <svg width="112" height="112" viewBox="0 0 48 48" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 21.5 24 8l17 13.5" stroke="#E9EEF7" stroke-width="3"/>
+          <path d="M11 24.5V40h26V24.5" stroke="#E9EEF7" stroke-width="3"/>
+          <path d="M16.5 40a7.5 7.5 0 0 1 15 0" stroke="#FFA31A" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="cap"><b class="pick">B · 집 안의 코트 &nbsp;— 추천</b>집 실루엣의 <em style="font-style:normal;color:var(--ink-2)">바닥이 자유투 라인</em>이 된다. 이름을 그림이 그대로 설명하고, 앰버 아크 하나만으로 농구가 읽힌다. 작게 줄여도 형태가 버틴다.</div>
+    </div>
+
+    <div class="item">
+      <div style="width:220px;height:220px;border-radius:48px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center">
+        <svg width="112" height="112" viewBox="0 0 48 48" fill="none">
+          <rect x="7" y="7" width="34" height="34" rx="9" stroke="rgba(233,238,247,.30)" stroke-width="2.6"/>
+          <path d="M24 13a11 11 0 1 1-11 11" stroke="#FFA31A" stroke-width="3.2" stroke-linecap="round"/>
+          <circle cx="24" cy="24" r="3" fill="#FFA31A"/>
+        </svg>
+      </div>
+      <div class="cap"><b>C · 샷클락</b>타이머라는 기능을 직접 말한다. 명확하지만 "집"도 "코트"도 없어서 이름과 따로 논다. 그리고 타이머 앱 아이콘은 흔하다.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ 2. 팔레트 ══════════════ -->
+<section>
+  <h2>2 · 팔레트와 타이포</h2>
+  <p class="ask">색은 <b>새벽 6시의 그 방</b>에서 가져왔습니다 — 창밖 여명의 짙은 남색, 요가 매트의 먹색, 그리고 어둠 속에서 유일하게 빛나는 것으로 <b>스코어보드 LED 앰버</b>. 액센트는 하나뿐이고, 마지막 3초에만 같은 계열에서 온도가 올라갑니다.</p>
+  <div class="sw">
+    <div><div class="c" style="background:#0B0E15"></div><div class="t"><b>Void</b><code>#0B0E15</code><em>창밖 여명 · 캔버스</em></div></div>
+    <div><div class="c" style="background:#12161F"></div><div class="t"><b>Surface</b><code>#12161F</code><em>요가 매트 · 카드</em></div></div>
+    <div><div class="c" style="background:#1A1F2A"></div><div class="t"><b>Raised</b><code>#1A1F2A</code><em>한 단 위</em></div></div>
+    <div><div class="c" style="background:#E9EEF7"></div><div class="t"><b>Ink</b><code>#E9EEF7</code><em>본문 · 타이머 숫자</em></div></div>
+    <div><div class="c" style="background:#FFA31A"></div><div class="t"><b>Buzzer</b><code>#FFA31A</code><em>단일 액센트 · LED</em></div></div>
+    <div><div class="c" style="background:#FF4D2E"></div><div class="t"><b>Buzzer Hot</b><code>#FF4D2E</code><em>전환 3초 전에만</em></div></div>
+    <div><div class="c" style="background:#F7F5F1"></div><div class="t"><b>Light Surface</b><code>#F7F5F1</code><em>낮 5분 루틴용</em></div></div>
+  </div>
+
+  <div class="type-spec" style="margin-top:22px">
+    <div><span class="n">clock / 104·800</span><span style="font-size:44px;font-weight:800;letter-spacing:-.055em;font-variant-numeric:tabular-nums">00:24</span></div>
+    <div><span class="n">score / 52·800</span><span style="font-size:34px;font-weight:800;letter-spacing:-.05em;color:var(--buzzer);font-variant-numeric:tabular-nums">12</span></div>
+    <div><span class="n">title / 30·700</span><span style="font-size:30px;font-weight:700;letter-spacing:-.03em">기본 경기</span></div>
+    <div><span class="n">name / 26·600</span><span style="font-size:26px;font-weight:600;letter-spacing:-.02em">고블릿 스쿼트</span></div>
+    <div><span class="n">body / 15·500</span><span style="font-size:15px;font-weight:500">10회 · 2세트 중 1세트</span></div>
+    <div><span class="n">cue / 13·400</span><span style="font-size:13px;color:var(--ink-2)">덤벨을 가슴 앞에 두 손으로 안고</span></div>
+    <div><span class="n">label / 11·700·.12em</span><span style="font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--ink-3)">2Q 하체</span></div>
+  </div>
+</section>
+
+<!-- ══════════════ 3. 운동 중 ══════════════ -->
+<section>
+  <h2>3 · 운동 중 화면 — 핵심 결정</h2>
+  <p class="ask">
+    이 앱은 <b>소리를 낼 수 없습니다.</b> 새벽 6시라 삑- 소리를 못 쓰고, iOS PWA는 진동도 지원하지 않습니다. 남은 신호는 화면뿐인데, 폰은 바닥에 있고 나연님은 1.5m 밖에서 플랭크를 하고 있습니다.<br><br>
+    그래서 A안은 타이머를 <b>화면 테두리 전체</b>에 둡니다. 중앙을 안 봐도 주변시로 잡히고, 전환 3초 전엔 테두리가 뜨거워집니다. B안은 흔한 중앙 링 방식으로, 비교용입니다.
+  </p>
+  <div class="row">
+
+    <!-- A안 평상 -->
+    <div class="item">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>6:12</span><span>100%</span></div>
+        <svg class="ring-border" viewBox="0 0 375 812" preserveAspectRatio="none">
+          <rect x="5" y="5" width="365" height="802" rx="35" stroke="rgba(233,238,247,.07)" stroke-width="5"/>
+          <rect x="5" y="5" width="365" height="802" rx="35" stroke="#FFA31A" stroke-width="5"
+                pathLength="100" stroke-dasharray="62 38" stroke-dashoffset="-6"/>
+        </svg>
+        <div class="live">
+          <div class="live-top">
+            <span class="q"><em>2Q</em> &nbsp;하체</span>
+            <span class="q-count">3 / 4</span>
+          </div>
+          <div class="live-mid">
+            <div class="ex-name">고블릿 스쿼트</div>
+            <div class="clock">00:24</div>
+            <div class="reps">10회 · 2세트 중 1세트</div>
+            <div class="ex-cue">덤벨을 가슴 앞에 두 손으로 안고<br>무릎보다 엉덩이를 먼저 뒤로</div>
+          </div>
+          <div class="live-bot">
+            <div class="next">다음 &nbsp;<b>덤벨 RDL</b></div>
+            <div class="pause"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b class="pick">A · 테두리 타이머 &nbsp;— 추천</b>남은 시간이 화면 가장자리를 한 바퀴 돌며 줄어든다. 중앙 숫자를 안 봐도 <em style="font-style:normal;color:var(--ink-2)">곁눈질로 읽힌다.</em> 중앙이 비니까 동작명과 숫자를 훨씬 크게 쓸 수 있다.</div>
+    </div>
+
+    <!-- A안 3초 전 -->
+    <div class="item">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>6:12</span><span>100%</span></div>
+        <svg class="ring-border" viewBox="0 0 375 812" preserveAspectRatio="none">
+          <rect x="5" y="5" width="365" height="802" rx="35" stroke="rgba(255,77,46,.16)" stroke-width="9"/>
+          <rect x="5" y="5" width="365" height="802" rx="35" stroke="#FF4D2E" stroke-width="9"
+                pathLength="100" stroke-dasharray="7 93" stroke-dashoffset="-6"/>
+        </svg>
+        <div style="position:absolute;inset:0;z-index:4;background:radial-gradient(120% 60% at 50% 0%,rgba(255,77,46,.16),transparent 62%),radial-gradient(120% 60% at 50% 100%,rgba(255,77,46,.16),transparent 62%)"></div>
+        <div class="live">
+          <div class="live-top">
+            <span class="q"><em>2Q</em> &nbsp;하체</span>
+            <span class="q-count">3 / 4</span>
+          </div>
+          <div class="live-mid">
+            <div class="ex-name">고블릿 스쿼트</div>
+            <div class="clock hot">00:03</div>
+            <div class="reps" style="color:var(--buzzer-hot);font-weight:600">곧 전환됩니다</div>
+            <div class="ex-cue">덤벨을 가슴 앞에 두 손으로 안고<br>무릎보다 엉덩이를 먼저 뒤로</div>
+          </div>
+          <div class="live-bot">
+            <div class="next">다음 &nbsp;<b>덤벨 RDL</b></div>
+            <div class="pause"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>A · 전환 3초 전 (같은 화면의 상태 변화)</b>테두리가 굵어지고 위아래로 열이 번진다. <em style="font-style:normal;color:var(--ink-2)">소리를 못 내는 대신 화면 전체가 버저 역할</em>을 한다. 이게 이 앱의 시그니처.</div>
+    </div>
+
+    <!-- B안 -->
+    <div class="item">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>6:12</span><span>100%</span></div>
+        <div class="live" style="padding-top:74px">
+          <div class="live-top">
+            <span class="q"><em>2Q</em> &nbsp;하체</span>
+            <span class="q-count">3 / 4</span>
+          </div>
+          <div class="live-mid">
+            <div class="ex-name">고블릿 스쿼트</div>
+            <div class="dial">
+              <svg viewBox="0 0 246 246">
+                <circle cx="123" cy="123" r="113" fill="none" stroke="rgba(233,238,247,.07)" stroke-width="10"/>
+                <circle cx="123" cy="123" r="113" fill="none" stroke="#FFA31A" stroke-width="10"
+                        stroke-linecap="round" pathLength="100" stroke-dasharray="62 38"/>
+              </svg>
+              <div class="clock">00:24</div>
+            </div>
+            <div class="reps">10회 · 2세트 중 1세트</div>
+            <div class="ex-cue">덤벨을 가슴 앞에 두 손으로 안고<br>무릎보다 엉덩이를 먼저 뒤로</div>
+          </div>
+          <div class="live-bot">
+            <div class="next">다음 &nbsp;<b>덤벨 RDL</b></div>
+            <div class="pause"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>B · 중앙 링 (비교용)</b>익숙하고 안전한 방식. 다만 링이 중앙을 차지해 <em style="font-style:normal;color:var(--ink-2)">숫자가 104px → 66px로 작아지고</em>, 시선을 중앙에 고정시켜야 읽힌다. 대부분의 홈트 앱이 이 모습이다.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ 4. 오늘 · 기록 · 스플래시 ══════════════ -->
+<section>
+  <h2>4 · 오늘 · 기록 · 진입</h2>
+  <p class="ask">"오늘" 화면은 <b>결정할 게 없어야 합니다.</b> 새벽 6시에 잠이 덜 깬 채 여는 화면이라, 오늘 할 것이 이미 정해져 있고 버튼 하나만 누르면 시작됩니다. 기록 화면에서만 농구 스코어보드가 나옵니다 — <b>HOME은 실내 홈트, AWAY는 러닝</b>.</p>
+  <div class="row">
+
+    <!-- 오늘 -->
+    <div class="item">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>6:04</span><span>100%</span></div>
+        <div class="scr">
+          <div class="scr-head">
+            <div class="date">7월 30일 목요일<b>좋은 아침이에요</b></div>
+            <span class="badge mute">🔇 조용 모드</span>
+          </div>
+
+          <div class="hero">
+            <div class="lbl">오늘의 경기</div>
+            <div class="title">기본 경기</div>
+            <div class="meta">15분 · 3쿼터 + 쿨다운 · 10동작</div>
+            <div class="quarters"><span class="f"></span><span class="f"></span><span class="f"></span><span class="c"></span></div>
+            <button class="cta"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>시작</button>
+          </div>
+
+          <div class="seg">
+            <button>타임아웃<em>5분</em></button>
+            <button class="on">기본 경기<em>15분</em></button>
+            <button>풀 경기<em>30분</em></button>
+          </div>
+
+          <div class="mini">
+            <div><div class="k">이번 주</div><div class="v">3<small> / 4</small></div></div>
+            <div class="mini-sep"></div>
+            <div><div class="k">연속</div><div class="v">12<small>일</small></div></div>
+            <div class="mini-sep"></div>
+            <div><div class="k">다음 원정</div><div class="v" style="font-size:17px;font-weight:600">내일</div></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="on"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 12.5V21h13v-8.5"/></svg>오늘</div>
+          <div><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>기록</div>
+          <div><svg viewBox="0 0 24 24"><path d="M13 4l-6 9h5l-1 7 6-9h-5z"/></svg>원정</div>
+          <div><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 15a2 2 0 1 1 0-4 1.6 1.6 0 0 0 1.5-2.6l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 3a2 2 0 1 1 4 0 1.6 1.6 0 0 0 2.6 1.5l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 21 11a2 2 0 1 1 0 4z"/></svg>설정</div>
+        </div>
+      </div>
+      <div class="cap"><b>오늘</b>화면 절반을 히어로 카드 하나가 먹는다. 분량 전환은 그 아래 작게. 스트릭은 <em style="font-style:normal;color:var(--ink-2)">주 단위(3/4)를 먼저</em> 보여줘 하루 빠져도 무너지지 않게 했다.</div>
+    </div>
+
+    <!-- 기록 -->
+    <div class="item">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>21:40</span><span>72%</span></div>
+        <div class="scr">
+          <div class="scr-head"><div class="date">기록<b>2026 · 7월</b></div></div>
+
+          <div class="board">
+            <div class="board-top"><span class="m">BOX SCORE</span><span class="badge">7월</span></div>
+            <div class="board-grid">
+              <div class="side"><div class="k">HOME</div><div class="n">12</div><div class="s">실내 홈트</div></div>
+              <div class="board-sep"></div>
+              <div class="side away"><div class="k">AWAY</div><div class="n">4</div><div class="s">러닝</div></div>
+            </div>
+            <div class="pct"><span class="k">야투율 · 목표 대비</span><span class="v">16 / 20 &nbsp;<span style="color:var(--buzzer)">80%</span></span></div>
+          </div>
+
+          <div class="heat">
+            <div class="heat-head">
+              <span class="t">7월</span>
+              <span class="l">
+                <i class="d1"></i>타임아웃 <i class="d2"></i>기본 <i class="d3"></i>풀 <i class="away"></i>원정
+              </span>
+            </div>
+            <div class="dow"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
+            <div class="grid">
+              <i></i><i class="d1"></i><i class="d2"></i><i></i><i class="d1"></i><i class="away"></i><i></i>
+              <i class="d2"></i><i class="d1"></i><i></i><i class="d3"></i><i></i><i></i><i class="away"></i>
+              <i class="d1"></i><i class="d2"></i><i></i><i></i><i class="d1"></i><i></i><i></i>
+              <i></i><i class="d1"></i><i class="away"></i><i class="d2"></i><i></i><i></i><i></i>
+              <i></i><i class="d3"></i><i></i><i></i><i class="away"></i><i></i><i></i>
+            </div>
+          </div>
+
+          <div class="logs">
+            <div class="log"><span class="dot"></span><span class="tx"><b>기본 경기</b><span>7월 30일 · 06:04 · 3쿼터</span></span><span class="rt">15:20</span></div>
+            <div class="log"><span class="dot away"></span><span class="tx"><b>원정 · 2주차</b><span>7월 29일 · 06:10 · 걷기2/달리기2</span></span><span class="rt">20:00</span></div>
+            <div class="log"><span class="dot"></span><span class="tx"><b>타임아웃</b><span>7월 28일 · 15:22 · 1쿼터</span></span><span class="rt">05:10</span></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 12.5V21h13v-8.5"/></svg>오늘</div>
+          <div class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>기록</div>
+          <div><svg viewBox="0 0 24 24"><path d="M13 4l-6 9h5l-1 7 6-9h-5z"/></svg>원정</div>
+          <div><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 15a2 2 0 1 1 0-4 1.6 1.6 0 0 0 1.5-2.6l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 3a2 2 0 1 1 4 0 1.6 1.6 0 0 0 2.6 1.5l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 21 11a2 2 0 1 1 0 4z"/></svg>설정</div>
+        </div>
+      </div>
+      <div class="cap"><b>기록</b>박스스코어에서 <em style="font-style:normal;color:var(--ink-2)">HOME(홈트) / AWAY(러닝)</em>가 나뉜다. 히트맵의 <em style="font-style:normal;color:var(--ink-2)">테두리만 있는 칸</em>은 원정(러닝)한 날.</div>
+    </div>
+
+    <!-- 스플래시 -->
+    <div class="item">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="splash">
+          <svg width="76" height="76" viewBox="0 0 48 48" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 21.5 24 8l17 13.5" stroke="#E9EEF7" stroke-width="3"/>
+            <path d="M11 24.5V40h26V24.5" stroke="#E9EEF7" stroke-width="3"/>
+            <path d="M16.5 40a7.5 7.5 0 0 1 15 0" stroke="#FFA31A" stroke-width="3"/>
+          </svg>
+          <div class="wm">홈코트</div>
+          <div class="cf">집이 곧 나의 코트</div>
+        </div>
+        <div class="stamp">RESPOFLOV</div>
+      </div>
+      <div class="cap"><b>진입 (스플래시)</b>로고 B안 적용. 캐치프레이즈 <em style="font-style:normal;color:var(--ink-2)">"집이 곧 나의 코트"</em>는 후보이며 아래 다른 안도 있습니다. 하단 <em style="font-style:normal;color:var(--ink-2)">RESPOFLOV</em> 각인은 규격 그대로.</div>
+    </div>
+
+  </div>
+
+  <div class="changes" style="margin-top:34px">
+    <b>캐치프레이즈 후보</b>
+    <ul>
+      <li><strong>집이 곧 나의 코트</strong> — 이름을 그대로 풀어냄. 안전한 선택</li>
+      <li><strong>오늘도 홈경기</strong> — 매일 여는 앱이라는 성격이 드러남. 가볍고 반복에 어울림</li>
+      <li><strong>조용히, 매일, 한 쿼터씩</strong> — 층간소음·지속성·쿼터 구조를 한 줄에. 가장 설명적</li>
+      <li><strong>아래층은 모르게</strong> — 위트. 이 앱의 차별점을 정면으로 말하지만 톤이 가벼워짐</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+</body>
+</html>
