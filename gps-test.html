@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="gps-test.webmanifest">
+<title>GPS 테스트 · 홈트런</title>
+<style>
+  :root{
+    --bg:#0d1117; --card:#161b22; --line:rgba(255,255,255,.10);
+    --tx:#e6edf3; --tx2:rgba(230,237,243,.62); --tx3:rgba(230,237,243,.38);
+    --ok:#3fb950; --warn:#d29922; --bad:#f85149; --accent:#58a6ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    background:var(--bg); color:var(--tx); min-height:100svh;
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",system-ui,sans-serif;
+    padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom));
+    max-width:520px; margin:0 auto;
+  }
+  h1{font-size:19px;font-weight:700;letter-spacing:-.01em}
+  h1 small{display:block;font-size:12px;font-weight:500;color:var(--tx3);margin-top:4px;letter-spacing:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+  .card h2{font-size:12px;font-weight:700;color:var(--tx2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+  .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;font-size:13px}
+  .row span:first-child{color:var(--tx2);flex:0 0 auto}
+  .row span:last-child{text-align:right;font-variant-numeric:tabular-nums;word-break:break-all}
+  .ok,.card h2.ok{color:var(--ok)}
+  .warn,.card h2.warn{color:var(--warn)}
+  .bad,.card h2.bad{color:var(--bad)}
+  button{
+    width:100%;padding:14px;border-radius:11px;border:1px solid var(--line);
+    background:#21262d;color:var(--tx);font:600 15px/1 inherit;font-family:inherit;
+    margin-top:8px;cursor:pointer;transition:transform .1s
+  }
+  button:active{transform:scale(.98)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#04121f}
+  button.danger{background:transparent;border-color:rgba(248,81,73,.4);color:var(--bad)}
+  .hero{text-align:center;padding:18px 0 6px}
+  .hero b{display:block;font-size:38px;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .hero i{display:block;font-style:normal;font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-top:2px}
+  .heros{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+  .heros .hero b{font-size:26px}
+  #log{
+    font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
+    background:#0a0d12;border:1px solid var(--line);border-radius:10px;
+    padding:10px;height:260px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;color:var(--tx2)
+  }
+  #log .t{color:var(--tx3)}
+  #log .e{color:var(--warn)}
+  #log .x{color:var(--bad)}
+  #log .g{color:var(--ok)}
+  ol{margin:0 0 0 18px;font-size:13px;color:var(--tx2)}
+  ol li{margin:7px 0}
+  ol b{color:var(--tx)}
+  .note{font-size:12px;color:var(--tx3);margin-top:10px;line-height:1.6}
+  .stamp{position:fixed;left:0;right:0;bottom:max(10px,env(safe-area-inset-bottom));
+    text-align:center;font-size:9.5px;font-weight:600;letter-spacing:.32em;text-indent:.32em;
+    color:rgba(230,237,243,.24);pointer-events:none}
+</style>
+</head>
+<body>
+
+<h1>GPS 추적 가능성 테스트<small>홈코트(08) 러닝 기능 사전 검증 · 이 페이지는 앱이 아니라 실험용입니다</small></h1>
+
+<div class="card" id="banner" hidden></div>
+
+<div class="card">
+  <h2>1. 실행 환경</h2>
+  <div class="row"><span>보안 컨텍스트(HTTPS)</span><span id="env-secure">-</span></div>
+  <div class="row"><span>홈 화면 앱(standalone)</span><span id="env-standalone">-</span></div>
+  <div class="row"><span>Geolocation API</span><span id="env-geo">-</span></div>
+  <div class="row"><span>Screen Wake Lock API</span><span id="env-wake">-</span></div>
+  <div class="row"><span>기기 / 버전</span><span id="env-ua">-</span></div>
+</div>
+
+<div class="card">
+  <h2>2. 측정</h2>
+  <div class="heros">
+    <div class="hero"><b id="m-dist">0</b><i>METERS</i></div>
+    <div class="hero"><b id="m-fix">0</b><i>FIXES</i></div>
+    <div class="hero"><b id="m-acc">–</b><i>ACC (M)</i></div>
+  </div>
+  <div class="row"><span>추적 상태</span><span id="m-state" class="tx3">대기 중</span></div>
+  <div class="row"><span>마지막 수신</span><span id="m-last">–</span></div>
+  <div class="row"><span>최대 수신 공백</span><span id="m-gap">–</span></div>
+  <div class="row"><span>화면 꺼짐 방지</span><span id="m-wake">off</span></div>
+
+  <button class="primary" id="btn-start">추적 시작 (Wake Lock 포함)</button>
+  <button id="btn-stop">추적 정지</button>
+</div>
+
+<div class="card">
+  <h2>3. 테스트 순서</h2>
+  <ol>
+    <li><b>추적 시작</b>을 누르고 위치 권한을 "허용"합니다. 팝업이 아예 안 뜨면 그 자체가 중요한 결과이니 그대로 기록됩니다.</li>
+    <li>집 앞을 <b>3~5분 걸어 다닙니다.</b> 화면을 켠 상태로 두고, 거리(METERS)가 실제 이동과 비슷하게 늘어나는지 봅니다.</li>
+    <li><b>전원 버튼을 눌러 화면을 끄고</b> 2분 더 걷습니다. ← <b>이게 핵심 시험입니다.</b></li>
+    <li>화면을 다시 켜서 이 페이지로 돌아옵니다. 로그에 화면 꺼진 동안의 수신 기록이 남아 있는지, <b>최대 수신 공백</b>이 몇 초인지 확인합니다.</li>
+    <li>추적을 정지하고 <b>로그 복사</b>를 눌러 채팅에 붙여넣어 주세요. 제가 해석해서 러닝 기능 방향을 결정하겠습니다.</li>
+  </ol>
+  <div class="note">
+    로그는 자동 저장되어 앱을 닫았다 열어도 남습니다. 배터리를 꽤 쓰니 테스트 후엔 반드시 정지해 주세요.
+  </div>
+</div>
+
+<div class="card">
+  <h2>4. 로그</h2>
+  <div id="log"></div>
+  <button id="btn-copy">로그 복사</button>
+  <button class="danger" id="btn-clear">로그 비우기</button>
+</div>
+
+<div class="stamp">RESPOFLOV</div>
+
+<script>
+(function(){
+  'use strict';
+  var LS = 'homet-run.gps-test.v1';
+  var logEl = document.getElementById('log');
+  var lines = [];
+  var st = { watchId:null, wake:null, fixes:0, dist:0, prev:null, lastAt:0, maxGap:0, startAt:0 };
+
+  function $(id){ return document.getElementById(id); }
+  function pad(n){ return n<10 ? '0'+n : ''+n; }
+  function clock(d){ return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
+
+  function log(msg, kind){
+    var line = { t: Date.now(), m: msg, k: kind||'' };
+    lines.push(line);
+    if (lines.length > 600) lines.splice(0, lines.length-600);
+    save(); render(line);
+  }
+  function render(line){
+    var d = new Date(line.t);
+    var span = document.createElement('div');
+    if (line.k) span.className = line.k;
+    span.textContent = clock(d)+'  '+line.m;
+    logEl.appendChild(span);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function redrawAll(){
+    logEl.textContent = '';
+    for (var i=0;i<lines.length;i++) render(lines[i]);
+  }
+  function save(){
+    try { localStorage.setItem(LS, JSON.stringify({ lines:lines, dist:st.dist, fixes:st.fixes, maxGap:st.maxGap })); }
+    catch(e){ /* 용량 초과는 무시 */ }
+  }
+  function load(){
+    try {
+      var raw = localStorage.getItem(LS);
+      if (!raw) return;
+      var o = JSON.parse(raw);
+      lines = o.lines || [];
+      st.dist = o.dist || 0; st.fixes = o.fixes || 0; st.maxGap = o.maxGap || 0;
+      redrawAll(); paint();
+      if (lines.length) log('--- 페이지 재진입 (이전 로그 '+lines.length+'줄 복원) ---', 'e');
+    } catch(e){ /* 손상된 로그는 버림 */ }
+  }
+
+  // 하버사인 — 두 좌표 사이 거리(m)
+  function distance(a, b){
+    var R = 6371000, rad = Math.PI/180;
+    var dLat = (b.lat-a.lat)*rad, dLon = (b.lon-a.lon)*rad;
+    var la1 = a.lat*rad, la2 = b.lat*rad;
+    var h = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)*Math.sin(dLon/2);
+    return 2*R*Math.asin(Math.sqrt(h));
+  }
+
+  function paint(){
+    $('m-dist').textContent = Math.round(st.dist);
+    $('m-fix').textContent  = st.fixes;
+    $('m-gap').textContent  = st.maxGap ? (st.maxGap/1000).toFixed(1)+'초' : '–';
+  }
+
+  // --- 1. 환경 점검 ---
+  function checkEnv(){
+    var sec = window.isSecureContext;
+    $('env-secure').textContent = sec ? '예' : '아니오 — 위치 사용 불가';
+    $('env-secure').className = sec ? 'ok' : 'bad';
+
+    var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches)
+                     || navigator.standalone === true;
+    $('env-standalone').textContent = standalone ? '예 (홈 화면에서 실행)' : '아니오 (Safari 탭)';
+    $('env-standalone').className = standalone ? 'ok' : 'warn';
+
+    var geo = 'geolocation' in navigator;
+    $('env-geo').textContent = geo ? '있음' : '없음';
+    $('env-geo').className = geo ? 'ok' : 'bad';
+
+    var wake = 'wakeLock' in navigator;
+    $('env-wake').textContent = wake ? '있음' : '없음 (iOS 16.4 미만이거나 미지원)';
+    $('env-wake').className = wake ? 'ok' : 'warn';
+
+    $('env-ua').textContent = navigator.userAgent.replace(/^Mozilla\/5\.0\s*/,'').slice(0,70);
+
+    log('환경: secure='+sec+' standalone='+standalone+' geo='+geo+' wakeLock='+wake);
+    log('UA: '+navigator.userAgent);
+    if (!sec) log('경고: HTTPS가 아니라 위치 API가 차단됩니다. HTTPS로 배포한 뒤 다시 열어주세요.', 'x');
+
+    // 이 테스트는 아이폰에서만 의미가 있다 — 다른 환경에서는 이유를 분명히 알려준다
+    var ua = navigator.userAgent;
+    var isIOS = /iPhone|iPad|iPod/.test(ua)
+                || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1); // 아이패드 데스크톱 모드
+    var banner = $('banner');
+
+    if (!isIOS) {
+      banner.hidden = false;
+      banner.innerHTML =
+        '<h2 class="bad">이 기기에서는 테스트할 수 없습니다</h2>'
+        + '<div class="note" style="color:var(--tx2)">'
+        + '이 페이지는 <b>아이폰</b>에서 열어야 의미가 있습니다.<br><br>'
+        + '· 맥에는 GPS 칩이 없어 Wi-Fi 기반 추정만 가능하고, 실외에서는 거리 측정이 불가능합니다.<br>'
+        + '· 검증 목표인 “홈 화면 PWA가 화면 꺼진 동안 위치를 받는가”는 맥에서 재현되지 않습니다.<br>'
+        + '· Claude 앱 내장 브라우저에는 위치 서비스가 연결돼 있지 않아 항상 권한 거부가 납니다.'
+        + '</div>';
+      log('안내: 아이폰이 아닌 환경입니다. 여기서 나온 결과는 판단 근거로 쓰지 않습니다.', 'e');
+    } else if (!standalone) {
+      banner.hidden = false;
+      banner.innerHTML =
+        '<h2 class="warn">홈 화면에 추가한 뒤 테스트해 주세요</h2>'
+        + '<div class="note" style="color:var(--tx2)">'
+        + '지금은 Safari 탭에서 열려 있습니다. 실제 앱과 조건을 맞추려면 '
+        + '<b>공유 → 홈 화면에 추가</b> 후, 홈 화면 아이콘으로 이 페이지를 열어 테스트해 주세요.<br><br>'
+        + '탭에서도 테스트는 되지만, 홈 화면 앱과 백그라운드 동작이 다를 수 있어 둘 다 해보면 가장 좋습니다.'
+        + '</div>';
+    }
+  }
+
+  // --- 2. Wake Lock ---
+  function acquireWake(){
+    if (!('wakeLock' in navigator)) { $('m-wake').textContent = '미지원'; return; }
+    navigator.wakeLock.request('screen').then(function(s){
+      st.wake = s;
+      $('m-wake').textContent = 'on'; $('m-wake').className = 'ok';
+      log('Wake Lock 획득 — 화면이 자동으로 꺼지지 않습니다', 'g');
+      s.addEventListener('release', function(){
+        st.wake = null;
+        $('m-wake').textContent = 'off'; $('m-wake').className = '';
+        log('Wake Lock 해제됨', 'e');
+      });
+    }).catch(function(err){
+      $('m-wake').textContent = '실패'; $('m-wake').className = 'bad';
+      log('Wake Lock 실패: '+err.name+' — '+err.message, 'x');
+    });
+  }
+  function releaseWake(){
+    if (st.wake) { st.wake.release().catch(function(){}); st.wake = null; }
+  }
+
+  // --- 3. 위치 추적 ---
+  function onFix(pos){
+    var now = Date.now();
+    var c = pos.coords;
+    var cur = { lat:c.latitude, lon:c.longitude };
+
+    if (st.lastAt) {
+      var gap = now - st.lastAt;
+      if (gap > st.maxGap) st.maxGap = gap;
+    }
+    st.lastAt = now;
+    st.fixes++;
+
+    var moved = 0;
+    // 정확도 30m 이내인 점만 거리 누적에 사용 (초기 부정확한 fix가 거리를 부풀리는 것 방지)
+    if (st.prev && c.accuracy <= 30) {
+      moved = distance(st.prev, cur);
+      if (moved > 1.5) { st.dist += moved; st.prev = cur; }
+    } else if (c.accuracy <= 30) {
+      st.prev = cur;
+    }
+
+    $('m-acc').textContent = Math.round(c.accuracy);
+    $('m-last').textContent = clock(new Date(now));
+    paint();
+
+    log('fix #'+st.fixes
+        +'  acc='+Math.round(c.accuracy)+'m'
+        +'  +'+moved.toFixed(1)+'m'
+        +'  총'+Math.round(st.dist)+'m'
+        +(document.hidden ? '  [화면 꺼짐/백그라운드]' : '')
+        , document.hidden ? 'g' : '');
+  }
+
+  function onErr(err){
+    var names = { 1:'PERMISSION_DENIED (권한 거부)', 2:'POSITION_UNAVAILABLE (위치 확인 불가)', 3:'TIMEOUT (시간 초과)' };
+    log('오류: '+(names[err.code]||err.code)+' — '+err.message, 'x');
+    $('m-state').textContent = '오류'; $('m-state').className = 'bad';
+
+    // 권한 거부·위치 불가는 회복 불가능한 상태 — 추적을 내려놓아야 다시 시도할 수 있다
+    if (err.code === 1 || err.code === 2) {
+      if (st.watchId !== null) { navigator.geolocation.clearWatch(st.watchId); st.watchId = null; }
+      releaseWake();
+      if (err.code === 1) log('힌트: 위치 권한이 막혀 있습니다. 아이폰 설정 > 개인정보 보호 및 보안 > 위치 서비스 > Safari 웹사이트를 확인하세요. (맥의 Claude 내장 브라우저는 위치 서비스가 없어 항상 이 오류가 납니다)', 'e');
+      log('추적을 내려놓았습니다. 원인을 해결한 뒤 다시 시작할 수 있습니다.', 'e');
+    }
+  }
+
+  function start(){
+    if (st.watchId !== null) { log('이미 추적 중입니다 — 먼저 정지해 주세요', 'e'); return; }
+    if (!('geolocation' in navigator)) { log('이 브라우저에 Geolocation이 없습니다', 'x'); return; }
+
+    st.startAt = Date.now(); st.lastAt = 0; st.prev = null;
+    log('=== 추적 시작 ===', 'g');
+    acquireWake();
+
+    st.watchId = navigator.geolocation.watchPosition(onFix, onErr, {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 30000
+    });
+    $('m-state').textContent = '추적 중'; $('m-state').className = 'ok';
+  }
+
+  function stop(){
+    if (st.watchId !== null) { navigator.geolocation.clearWatch(st.watchId); st.watchId = null; }
+    releaseWake();
+    $('m-state').textContent = '정지'; $('m-state').className = '';
+    var mins = st.startAt ? ((Date.now()-st.startAt)/60000).toFixed(1) : '0';
+    log('=== 추적 정지 · '+mins+'분 / '+st.fixes+'회 수신 / '+Math.round(st.dist)+'m / 최대공백 '+(st.maxGap/1000).toFixed(1)+'초 ===', 'g');
+  }
+
+  // --- 4. 백그라운드 전환 감지 ---
+  document.addEventListener('visibilitychange', function(){
+    log(document.hidden ? '>> 백그라운드 진입 (화면 꺼짐 또는 앱 전환)' : '<< 포그라운드 복귀', 'e');
+    // iOS는 백그라운드에서 Wake Lock을 해제하므로 복귀 시 재획득
+    if (!document.hidden && st.watchId !== null && !st.wake) acquireWake();
+  });
+  window.addEventListener('pagehide', function(){ log('>> pagehide (페이지 동결 가능)', 'e'); });
+  window.addEventListener('pageshow', function(){ log('<< pageshow', 'e'); });
+  window.addEventListener('freeze', function(){ log('>> freeze (브라우저가 페이지를 완전히 멈춤)', 'x'); });
+  window.addEventListener('resume', function(){ log('<< resume', 'e'); });
+
+  // --- 5. 버튼 ---
+  $('btn-start').onclick = start;
+  $('btn-stop').onclick  = stop;
+  $('btn-clear').onclick = function(){
+    lines = []; st.dist = 0; st.fixes = 0; st.maxGap = 0; st.prev = null; st.lastAt = 0;
+    logEl.textContent = ''; paint(); save(); log('로그를 비웠습니다');
+  };
+  $('btn-copy').onclick = function(){
+    var text = lines.map(function(l){ return clock(new Date(l.t))+'  '+l.m; }).join('\n');
+    var done = function(){ log('로그를 클립보드에 복사했습니다 ('+lines.length+'줄)', 'g'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ fallback(text); });
+    } else fallback(text);
+
+    function fallback(t){
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); }
+      catch(e){ log('복사 실패 — 로그를 직접 선택해서 복사해 주세요', 'x'); }
+      document.body.removeChild(ta);
+    }
+  };
+
+  load();
+  checkEnv();
+})();
+</script>
+</body>
+</html>

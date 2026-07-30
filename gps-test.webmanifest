@@ -1,0 +1,11 @@
+{
+  "name": "GPS 테스트 · 홈코트",
+  "short_name": "GPS 테스트",
+  "description": "홈코트(08) 러닝 기능의 GPS 추적 가능성을 실기기에서 검증하는 임시 테스트 페이지",
+  "start_url": "gps-test.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117"
+}
