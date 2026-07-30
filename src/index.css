@@ -1,0 +1,117 @@
+@import "tailwindcss";
+@import "pretendard/dist/web/variable/pretendardvariable.css";
+
+/* ────────────────────────────────────────────────
+   홈코트 디자인 토큰
+   색의 출처: 새벽 6시의 방 — 창밖 여명, 요가 매트, 스코어보드 LED
+   ──────────────────────────────────────────────── */
+:root {
+  --void: #0B0E15;
+  --surface: #12161F;
+  --raised: #1A1F2A;
+  --line: rgba(233, 238, 247, 0.09);
+  --line-2: rgba(233, 238, 247, 0.16);
+  --ink: #E9EEF7;
+  --ink-2: rgba(233, 238, 247, 0.62);
+  --ink-3: rgba(233, 238, 247, 0.40);
+  --ink-4: rgba(233, 238, 247, 0.24);
+  --buzzer: #FFA31A;
+  --buzzer-fill: #FFA31A;
+  --on-fill: #140C00;
+  --buzzer-hot: #FF4D2E;
+  --buzzer-soft: rgba(255, 163, 26, 0.13);
+  --sheet-dim: rgba(4, 6, 10, 0.72);
+  --lift: 0 10px 22px -8px rgba(0, 0, 0, 0.75);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --void: #F7F5F1;
+  --surface: #FFFFFF;
+  --raised: #FFFFFF;
+  --line: rgba(20, 23, 31, 0.10);
+  --line-2: rgba(20, 23, 31, 0.18);
+  --ink: #14171F;
+  --ink-2: rgba(20, 23, 31, 0.62);
+  --ink-3: rgba(20, 23, 31, 0.42);
+  --ink-4: rgba(20, 23, 31, 0.26);
+  --buzzer: #C96A00;
+  --buzzer-fill: #FFA31A;
+  --on-fill: #241300;
+  --buzzer-soft: rgba(255, 163, 26, 0.16);
+  --sheet-dim: rgba(20, 23, 31, 0.42);
+  --lift: 0 10px 22px -10px rgba(20, 23, 31, 0.28);
+  color-scheme: light;
+}
+
+@theme inline {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", system-ui, sans-serif;
+  --color-void: var(--void);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line2: var(--line-2);
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink-2);
+  --color-ink3: var(--ink-3);
+  --color-ink4: var(--ink-4);
+  --color-buzzer: var(--buzzer);
+  --color-buzzerfill: var(--buzzer-fill);
+  --color-buzzerhot: var(--buzzer-hot);
+  --color-buzzersoft: var(--buzzer-soft);
+  --color-onfill: var(--on-fill);
+}
+
+/* Tailwind v4는 유틸리티를 레이어에 넣는다. 리셋을 레이어 밖에 두면
+   레이어 없는 CSS가 항상 이겨서 py-[17px] 같은 유틸리티가 먹지 않는다. */
+@layer base {
+  * { -webkit-tap-highlight-color: transparent; }
+
+  html, body, #root { height: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--void);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  button { font-family: inherit; border: 0; background: none; color: inherit; padding: 0; }
+  input, select, textarea { font-family: inherit; }
+}
+
+/* 큰 글씨 모드 — 운동 중 화면의 숫자·동작명에만 적용 */
+:root[data-big="on"] { --live-scale: 1.14; }
+:root { --live-scale: 1; }
+
+.tnum { font-variant-numeric: tabular-nums; }
+.press { transition: transform 0.14s cubic-bezier(0.23, 1, 0.32, 1); }
+.press:active { transform: scale(0.97); }
+
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { scrollbar-width: none; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-up { animation: fadeUp 0.36s cubic-bezier(0.23, 1, 0.32, 1) both; }
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+.sheet-up { animation: sheetUp 0.26s cubic-bezier(0.23, 1, 0.32, 1) both; }
+
+@keyframes dimIn { from { opacity: 0; } to { opacity: 1; } }
+.dim-in { animation: dimIn 0.2s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

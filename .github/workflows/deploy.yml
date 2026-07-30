@@ -1,0 +1,51 @@
+name: Deploy to GitHub Pages
+
+# main에 푸시하면 자동으로 빌드해서 Pages에 올린다.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포는 한 번에 하나만 — 연달아 푸시하면 마지막 것만 반영
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # GPS 검증 도구는 앱 밖에 있지만 배포본에 같이 실어 기록을 남긴다
+      - name: 검증 도구 함께 배포
+        run: |
+          mkdir -p dist/test/gps
+          cp test/gps/gps-test.html test/gps/gps-test.webmanifest dist/test/gps/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
