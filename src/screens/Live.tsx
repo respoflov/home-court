@@ -126,6 +126,9 @@ export function Live({
         time: hm(startedAt.current),
         seconds: secs,
         quarters: new Set((partial ? doneSteps : steps).map((s) => s.quarterIndex)).size,
+        moveIds: [
+          ...new Set((partial ? doneSteps : steps).filter((s) => s.kind === 'work').map((s) => s.exercise.id)),
+        ],
         size,
         partial: partial || undefined,
         doneMoves: partial

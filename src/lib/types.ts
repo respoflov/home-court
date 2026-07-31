@@ -79,8 +79,15 @@ export interface SessionLog {
   totalMoves?: number
   /** 원정 전용 */
   awayWeek?: number
+  /** 이 세션에서 실제로 한 운동 id. 누적 통계를 내려면 필요하다. */
+  moveIds?: string[]
   /** GPS를 켰을 때만 */
   meters?: number
+  /**
+   * 지나온 좌표. [위도, 경도]를 5m 넘게 움직였을 때만 담는다.
+   * 배경 지도는 없고 궤적 모양만 그린다.
+   */
+  track?: [number, number][]
   /** 화면이 꺼져 위치를 못 받은 시간(초). 0보다 크면 거리는 추정치다. */
   gapSeconds?: number
 }

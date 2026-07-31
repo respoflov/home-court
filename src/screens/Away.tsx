@@ -67,7 +67,7 @@ export function Away() {
       </div>
       <div className="mt-[10px] rounded-[12px] px-[14px] py-3 text-[11.5px] leading-[1.6]"
            style={{ background: 'var(--buzzer-soft)', color: 'var(--buzzer)' }}>
-        {t('gpsNote')}
+        {t('gpsNote')} {t('gpsMapNote')}
       </div>
 
       <div className="mt-5 pb-8">
@@ -126,6 +126,8 @@ function AwayRun({ week, onExit }: { week: number; onExit: () => void }) {
   const meters = useRef(0)
   const gap = useRef(0)
   const lastFix = useRef<{ lat: number; lon: number; at: number } | null>(null)
+  /** 지나온 좌표. 5m 넘게 움직였을 때만 담아 용량을 줄인다. */
+  const track = useRef<[number, number][]>([])
   const hiddenAt = useRef<number | null>(null)
 
   useEffect(() => {
@@ -157,6 +159,9 @@ function AwayRun({ week, onExit }: { week: number; onExit: () => void }) {
         if (prev) {
           const d = haversine(prev.lat, prev.lon, lat, lon)
           if (d > 1.5) meters.current += d
+          if (d > 5) track.current.push([lat, lon])
+        } else {
+          track.current.push([lat, lon])
         }
         lastFix.current = { lat, lon, at: Date.now() }
       },
@@ -204,6 +209,7 @@ function AwayRun({ week, onExit }: { week: number; onExit: () => void }) {
       seconds: Math.round((Date.now() - startedAt.current.getTime()) / 1000),
       awayWeek: week,
       meters: data.settings.gpsEnabled ? Math.round(meters.current) : undefined,
+      track: data.settings.gpsEnabled && track.current.length > 1 ? track.current : undefined,
       gapSeconds: data.settings.gpsEnabled ? Math.round(gap.current) : undefined,
     }
     addLog(log)

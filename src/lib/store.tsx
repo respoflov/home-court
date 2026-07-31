@@ -75,6 +75,7 @@ interface Ctx {
   /** 지금이 조용 모드 시간대인가 */
   quietNow: boolean
   addLog: (log: SessionLog) => void
+  deleteLog: (id: string) => void
   /** 세트 피드백 기록. 무게를 올릴 때가 되면 부위를 돌려준다. */
   recordFeel: (exercise: Exercise, feel: Feel) => 'raise' | null
   raiseWeight: (exercise: Exercise) => void
@@ -166,6 +167,10 @@ export function Store({ children }: { children: ReactNode }) {
   }, [settings.quietAuto, settings.quietMorning, settings.quietNight, tick])
 
   const addLog = useCallback((log: SessionLog) => setData((d) => ({ ...d, logs: [log, ...d.logs] })), [])
+  const deleteLog = useCallback(
+    (id: string) => setData((d) => ({ ...d, logs: d.logs.filter((l) => l.id !== id) })),
+    [],
+  )
 
   const recordFeel = useCallback<Ctx['recordFeel']>((exercise, feel) => {
     let verdict: 'raise' | null = null
@@ -239,12 +244,12 @@ export function Store({ children }: { children: ReactNode }) {
     () => ({
       data, set, setSettings, lang, t,
       allExercises, exerciseById, allRoutines, routineById,
-      quietNow, addLog, recordFeel, raiseWeight, resetFeel,
+      quietNow, addLog, deleteLog, recordFeel, raiseWeight, resetFeel,
       exportBackup, importBackup, resetAll, figureShown, toggleFigure,
     }),
     [
       data, set, setSettings, lang, t, allExercises, exerciseById, allRoutines, routineById,
-      quietNow, addLog, recordFeel, raiseWeight, resetFeel, exportBackup, importBackup, resetAll,
+      quietNow, addLog, deleteLog, recordFeel, raiseWeight, resetFeel, exportBackup, importBackup, resetAll,
       figureShown, toggleFigure,
     ],
   )

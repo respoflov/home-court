@@ -155,10 +155,14 @@ const D = {
   run: ['달리기', 'Run'],
   sets: ['세트', 'sets'],
   startAway: ['원정 시작', 'Start away game'],
-  gpsLabel: ['GPS로 거리·경로 기록', 'Track distance with GPS'],
+  gpsLabel: ['GPS로 거리와 궤적 남기기', 'Record distance and track with GPS'],
   gpsSub: [
     '화면을 켜고 앱을 앞에 둬야 기록됩니다',
     'Keep the screen on and the app in front',
+  ],
+  gpsMapNote: [
+    '배경 지도는 없습니다. 지나온 궤적의 모양만 그립니다.',
+    'There is no base map. It draws the shape of the route only.',
   ],
   gpsNote: [
     '화면이 꺼지면 위치 수신이 멈춥니다. 꺼진 구간은 직선으로 추정됨이라고 기록에 남깁니다.',
@@ -177,6 +181,19 @@ const D = {
   fgPct: ['야투율 · 목표 대비', 'FG% · vs. goal'],
   noLogs: ['아직 기록이 없어요', 'No sessions yet'],
   noLogsSub: ['오늘 탭에서 첫 경기를 시작해 보세요', 'Start your first game from the Today tab'],
+  totalSessions: ['총 경기', 'Sessions'],
+  totalTime: ['총 시간', 'Total time'],
+  mostDone: ['많이 한 동작', 'Most done'],
+  byRoutine: ['루틴별', 'By routine'],
+  times: ['회', '×'],
+  pickDay: ['날짜를 누르면 그날 기록이 열립니다', 'Tap a day to open its sessions'],
+  noThatDay: ['이 날은 기록이 없어요', 'Nothing logged that day'],
+  deleteLog: ['이 기록 지우기', 'Delete this session'],
+  deleteLogAsk: ['이 기록을 지울까요?', 'Delete this session?'],
+  deleteLogBody: ['지운 기록은 되돌릴 수 없습니다.', 'A deleted session cannot be restored.'],
+  routeShape: ['지나온 궤적', 'Route shape'],
+  prevMonth: ['이전 달', 'Previous month'],
+  nextMonth: ['다음 달', 'Next month'],
 
   // 설정
   settings: ['설정', 'Settings'],
