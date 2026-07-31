@@ -7,6 +7,14 @@ import { MONTHS_EN, WEEKDAYS } from '@/lib/i18n'
 import type { SessionLog } from '@/lib/types'
 
 /**
+ * 원정 표시. 홈은 채우기, 원정은 테두리로 채널을 나눈다.
+ * 예전에는 이 테두리도 앰버라 풀 경기(같은 앰버)를 채운 칸 위에서 완전히 묻혔다.
+ * 앰버를 벗어난 색으로 두면 세 농도 전부에서 대비가 남는다.
+ * 검수 기록: test/heatmap/결과-2026-07-31.md
+ */
+const AWAY_RING = 'inset 0 0 0 2px color-mix(in srgb, var(--ink) 55%, transparent)'
+
+/**
  * 기록. 농구 용어라 영어에서는 번역이 거의 필요 없다 (BOX SCORE, FG%).
  *
  * 기록을 주르륵 늘어놓지 않는다. 히트맵이 목차이고,
@@ -140,7 +148,7 @@ export function Record() {
             <i className="ml-[5px] inline-block h-[9px] w-[9px] rounded-[2.5px]" style={{ background: shade.full }} />
             {t('sizeFull')}
             <i className="ml-[5px] inline-block h-[9px] w-[9px] rounded-[2.5px]"
-               style={{ boxShadow: 'inset 0 0 0 1.5px rgba(255,163,26,.75)' }} />
+               style={{ boxShadow: 'inset 0 0 0 1.5px color-mix(in srgb, var(--ink) 55%, transparent)' }} />
             {t('away')}
           </span>
         </div>
@@ -158,7 +166,7 @@ export function Record() {
               className="press grid h-[30px] place-items-center rounded-[6px] text-[10px] font-semibold"
               style={{
                 background: c.home ? shade[c.home] : 'color-mix(in srgb, var(--ink) 4%, transparent)',
-                boxShadow: c.away ? 'inset 0 0 0 1.5px rgba(255,163,26,.75)' : undefined,
+                boxShadow: c.away ? AWAY_RING : undefined,
                 opacity: c.inMonth ? 1 : 0.3,
                 color: c.home === 'full' ? 'var(--on-fill)' : 'var(--ink-4)',
               }}
@@ -288,7 +296,7 @@ function DayRow({ log, onDelete }: { log: SessionLog; onDelete: () => void }) {
         <span className="h-2 w-2 shrink-0 rounded-full"
               style={log.side === 'home'
                 ? { background: 'var(--buzzer-fill)' }
-                : { boxShadow: 'inset 0 0 0 1.5px var(--buzzer-fill)' }} />
+                : { boxShadow: 'inset 0 0 0 1.5px color-mix(in srgb, var(--ink) 55%, transparent)' }} />
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2 text-[14px] font-semibold">
             {lang === 'ko' ? log.titleKo : log.titleEn}

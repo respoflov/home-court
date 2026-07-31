@@ -23,8 +23,12 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
   const [confirmReset, setConfirmReset] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [editWindow, setEditWindow] = useState<'morning' | 'night' | null>(null)
-  /** 한 번에 하나만 펼친다. 다 펼쳐두면 접은 의미가 없다. */
-  const [open, setOpen] = useState<string | null>('grpScreen')
+  /**
+   * 한 번에 하나만 펼친다. 다 펼쳐두면 접은 의미가 없다.
+   * 처음에는 전부 접힌 채로 연다. 어느 하나를 열어두면 그 그룹만 특별해 보이고,
+   * 목록 전체를 훑기도 어려워진다.
+   */
+  const [open, setOpen] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const wakeSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator

@@ -33,11 +33,13 @@ jobs:
       # GPS 검증 도구는 앱 밖에 있지만 배포본에 같이 실어 기록을 남긴다
       - name: 검증 도구 함께 배포
         run: |
-          mkdir -p dist/test/gps dist/test/wakelock
+          mkdir -p dist/test/gps dist/test/wakelock dist/test/viewport
           cp test/gps/gps-test.html test/gps/gps-test.webmanifest dist/test/gps/
           cp test/wakelock/wakelock-test.html test/wakelock/wakelock-test.webmanifest dist/test/wakelock/
-          mkdir -p dist/test/figures
+          cp test/viewport/viewport-test.html test/viewport/viewport-test.webmanifest dist/test/viewport/
+          mkdir -p dist/test/figures dist/test/heatmap
           cp test/figures/contact-sheet.html dist/test/figures/
+          cp test/heatmap/heatmap-contrast.html dist/test/heatmap/
 
       - uses: actions/upload-pages-artifact@v3
         with:

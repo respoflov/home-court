@@ -1,0 +1,86 @@
+<meta charset="utf-8">
+<title>홈코트 앱 아이콘 시안 v5 — E안 중심 보정</title>
+<style>
+  body{margin:0;padding:26px 30px;background:#1b1d22;color:#e6e8ee;
+       font:14px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}
+  h1{font-size:17px;margin:0 0 4px}
+  .sub{font-size:12.5px;opacity:.62;margin-bottom:20px;max-width:860px}
+  .sub b{color:#FFC46B}
+  table{border-collapse:collapse}
+  th{font-size:11px;opacity:.5;font-weight:600;padding:0 12px 10px;text-align:center}
+  td{padding:9px 12px;text-align:center;vertical-align:middle}
+  td.name{text-align:left;font-size:12.5px;font-weight:700;white-space:nowrap}
+  td.name em{display:block;font-style:normal;font-weight:400;font-size:11px;opacity:.5;margin-top:2px}
+  .ico{border-radius:22.37%;display:inline-block}
+  .big{image-rendering:pixelated}
+  tr+tr td{border-top:1px solid #ffffff12}
+  .home{background:linear-gradient(160deg,#5d6b8a,#8d7f70);padding:9px;border-radius:15px;display:inline-block}
+</style>
+
+<h1>홈코트 앱 아이콘 시안 v5 — E안 중심 보정</h1>
+<div class="sub">
+  v4의 문제: 잘라낸 영역이 <b>그림 기준이 아니라 좌표 기준</b>이라 내용이 왼쪽으로 쏠리고 오른쪽 아래가 비었습니다.
+  실제 그려지는 것(코트 베이스라인 · 페인트존 · 자유투 서클)의 <b>바운딩 박스를 계산해 정중앙에</b> 놓았습니다.
+  선 농도는 스플래시와 같은 40%를 기본으로 하되, 40px에서 남는지 55%와 나란히 봅니다.
+</div>
+
+<table>
+  <tr><th></th><th>40px</th><th>60px</th><th>120px</th><th>40px를 6배로</th><th>원형 크롭</th><th>홈 화면</th></tr>
+  <tbody id="out"></tbody>
+</table>
+
+<script>
+function art(line, w){ return `
+  <rect x="5" y="9" width="38" height="30" rx="5" stroke="${line}" stroke-width="${2.4*w}" fill="none"/>
+  <path d="M5 18h10v12H5" stroke="${line}" stroke-width="${2.4*w}" stroke-linejoin="round" fill="none"/>
+  <circle cx="15" cy="24" r="5.5" stroke="#FFA31A" stroke-width="${2.8*w}" fill="none"/>
+  <path d="M43 17.5a6.5 6.5 0 0 0 0 13" stroke="${line}" stroke-width="${2.4*w}" fill="none"/>`
+}
+/* 잘라낸 뒤 화면에 남는 것의 바운딩 박스 (48 좌표계, 선 두께 포함)
+   왼쪽  = 코트 베이스라인 바깥면 5 - 2.4w/2
+   오른쪽 = 자유투 서클 바깥면 15 + 5.5 + 2.8w/2
+   위/아래 = 서클 위아래 24 ∓ (5.5 + 2.8w/2)   (페인트존 18~30이 서클 안에 들어온다) */
+const SIDE = 24            // 잘라낼 정사각형 한 변
+function box(w){
+  const L = 5 - 1.2*w, R = 20.5 + 1.4*w
+  const T = 24 - (5.5 + 1.4*w), B = 24 + (5.5 + 1.4*w)
+  return [ (L+R)/2 - SIDE/2, (T+B)/2 - SIDE/2, SIDE ]
+}
+function svg(line, w, inset=1){
+  const [x,y,s] = box(w)
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${s} ${s}">
+    <rect x="${-x}" y="${-y}" width="200" height="200" fill="#0B0E15"/>
+    <g transform="translate(${s/2} ${s/2}) scale(${inset}) translate(${-s/2} ${-s/2})">
+      <g transform="translate(${-x} ${-y})">${art(line,w)}</g>
+    </g>
+  </svg>`
+}
+const V = [
+  ['F-40 · 얇게', 'rgba(233,238,247,.40)', 0.7],
+  ['F-40 · 굵게', 'rgba(233,238,247,.40)', 0.85],
+  ['F-55 · 얇게', 'rgba(233,238,247,.55)', 0.7],
+  ['F-55 · 굵게', 'rgba(233,238,247,.55)', 0.85],
+]
+const out = document.getElementById('out')
+V.forEach(([k, line, w]) => {
+  const url  = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg(line, w))
+  const murl = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg(line, w, 0.8))
+  const tr = document.createElement('tr')
+  tr.innerHTML = `
+    <td class="name">${k}<em>선 굵기 ×${w}</em></td>
+    <td><img class="ico" src="${url}" width="40" height="40"></td>
+    <td><img class="ico" src="${url}" width="60" height="60"></td>
+    <td><img class="ico" src="${url}" width="120" height="120"></td>
+    <td><canvas class="big" data-src="${url}" width="40" height="40"
+                style="width:180px;height:180px;border-radius:22.37%"></canvas></td>
+    <td><canvas class="big" data-src="${murl}" width="40" height="40"
+                style="width:120px;height:120px;border-radius:50%"></canvas></td>
+    <td><span class="home"><img class="ico" src="${url}" width="60" height="60"></span></td>`
+  out.appendChild(tr)
+})
+document.querySelectorAll('canvas').forEach(cv => {
+  const im = new Image()
+  im.onload = () => cv.getContext('2d').drawImage(im, 0, 0, 40, 40)
+  im.src = cv.dataset.src
+})
+</script>

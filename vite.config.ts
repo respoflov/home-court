@@ -19,6 +19,8 @@ export default defineConfig({
       manifest: {
         name: "홈코트",
         short_name: "홈코트",
+        // 적지 않으면 플러그인이 lang: "en"을 넣는다. 기본 언어는 한국어다
+        lang: "ko",
         description: "집에서 층간소음 없이 하는 홈트 루틴을 순서대로 따라가는 앱",
         start_url: "./",
         scope: "./",

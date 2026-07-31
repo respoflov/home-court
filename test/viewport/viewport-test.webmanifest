@@ -1,0 +1,10 @@
+{
+  "name": "화면 여백 측정 · 홈코트",
+  "short_name": "여백 측정",
+  "description": "홈코트의 탭바 아래 여백이 왜 뜨는지 실기기에서 값을 재는 도구. 홈 화면에 추가해 standalone 상태로 열어야 의미가 있다",
+  "start_url": "viewport-test.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#0B0E15",
+  "theme_color": "#0B0E15"
+}

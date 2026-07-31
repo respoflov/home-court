@@ -277,7 +277,7 @@ const D = {
   expNone: ['처음', 'New to it'],
   expSome: ['조금 해봄', 'A little'],
   expUsed: ['익숙함', 'Comfortable'],
-  ownedDumbbell: ['가지고 있는 덤벨 (개당 최대)', 'Your dumbbells (max per hand)'],
+  ownedDumbbell: ['가지고 있는 덤벨 무게 (한 개당 최대 kg)', 'Your dumbbells (heaviest, kg per hand)'],
   privacyNote: [
     '여기서 받은 정보는 기기 안에만 저장되고 어디로도 보내지 않습니다. 설정에서 언제든 바꾸거나 지울 수 있습니다.',
     'This stays on your device and is never sent anywhere. You can change or clear it in Settings.',
@@ -317,6 +317,31 @@ const D = {
     'Tap "How was that set?" as you go and the app tells you when to add weight.',
   ],
   letsStart: ['시작하기', 'Get started'],
+
+  // 최초 1회 안내
+  // 홈 화면에서 열었더라도 뜬다. 설치 방법만 알리는 자리가 아니라
+  // 이 앱이 무엇이고 어디에 무엇이 있는지 처음 한 번 말해주는 자리다.
+  welcomeTitle: ['홈코트는 이렇게 씁니다', 'How Home Court works'],
+  welcomeBody: [
+    '집에서 층간소음 없이 할 수 있는 운동만 모았습니다. 점프 동작은 넣지 않았고, 모든 운동에 소음 등급이 붙어 있어요. 실내 운동은 홈경기, 러닝은 원정으로 기록됩니다.',
+    'Only moves you can do at home without disturbing anyone below. No jumping at all, and every move carries a noise level. Indoor sessions count as home games, runs as away games.',
+  ],
+  welcomeToday: [
+    '분량을 고르고 시작을 누르면 순서대로 따라가면 됩니다',
+    'Pick a length, press start, and follow along',
+  ],
+  welcomePlaybook: [
+    '운동과 루틴을 직접 고치거나 새로 만들 수 있어요',
+    'Edit the moves and routines, or build your own',
+  ],
+  welcomeRecord: [
+    '달력에 한 달치가 쌓입니다. 날짜를 누르면 그날 것만 열려요',
+    'A month fills in on the calendar. Tap a day to open just that day',
+  ],
+  welcomeMore: [
+    '자세한 사용법과 운동 구성은 설정 탭의 앱 안내에 있습니다.',
+    'Fuller how-tos and the routine breakdown live in the Settings tab, under Guide.',
+  ],
 
   // 설치 안내
   installTitle: ['앱처럼 쓰려면 홈 화면에 추가하세요', 'Add it to your home screen'],

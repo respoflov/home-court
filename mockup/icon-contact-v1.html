@@ -1,0 +1,69 @@
+<meta charset="utf-8">
+<title>홈코트 앱 아이콘 시안 v1</title>
+<style>
+  body{margin:0;padding:28px 32px;background:#1b1d22;color:#e6e8ee;
+       font:14px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}
+  h1{font-size:17px;margin:0 0 4px}
+  .sub{font-size:12.5px;opacity:.55;margin-bottom:26px;max-width:760px}
+  h2{font-size:13px;margin:30px 0 3px;letter-spacing:.02em}
+  .note{font-size:11.5px;opacity:.5;margin-bottom:12px}
+  .row{display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap}
+  .item{text-align:center}
+  .item span{display:block;font-size:10px;opacity:.45;margin-top:6px}
+  .ico{border-radius:22.37%;overflow:hidden;display:block}   /* iOS 스퀘어클 근사 */
+  .mask{border-radius:50%;overflow:hidden;display:block}     /* 안드로이드 원형 크롭 */
+  .home{background:linear-gradient(160deg,#5d6b8a,#8d7f70);padding:16px;border-radius:20px;
+        display:flex;gap:14px;align-items:center}
+  hr{border:0;border-top:1px solid #ffffff14;margin:26px 0}
+</style>
+
+<h1>홈코트 앱 아이콘 시안 v1</h1>
+<div class="sub">
+  세 후보 모두 <b>진입 화면 로고와 같은 그림</b>(하프코트 + 자유투 서클)입니다. 다른 것은 선의 밝기와 그림의 크기뿐입니다.
+  실제로 보게 될 가장 작은 크기(홈 화면 60px, 목록 40px)에서 형태가 읽히는지가 판단 기준입니다.
+</div>
+
+<div id="out"></div>
+
+<script>
+/* 진입 화면 로고 (src/components/bits.tsx 의 Logo) 와 같은 좌표.
+   48 viewBox 안에서: 코트 테두리 · 왼쪽 페인트존 · 자유투 서클 · 오른쪽 센터 아크 */
+function art(line, w){ return `
+  <rect x="5" y="9" width="38" height="30" rx="5" stroke="${line}" stroke-width="${2.4*w}" fill="none"/>
+  <path d="M5 18h10v12H5" stroke="${line}" stroke-width="${2.4*w}" stroke-linejoin="round" fill="none"/>
+  <circle cx="15" cy="24" r="5.5" stroke="#FFA31A" stroke-width="${2.8*w}" fill="none"/>
+  <path d="M43 17.5a6.5 6.5 0 0 0 0 13" stroke="${line}" stroke-width="${2.4*w}" fill="none"/>`
+}
+function svg(line, scale, w, bg='#0B0E15'){
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+    <rect width="48" height="48" fill="${bg}"/>
+    <g transform="translate(24 24) scale(${scale}) translate(-24 -24)">${art(line,w)}</g>
+  </svg>`
+}
+
+const V = [
+  ['A', '스플래시 그대로', 'rgba(233,238,247,.40)', 1, 1],
+  ['B', '선을 밝게', 'rgba(233,238,247,.80)', 1, 1],
+  ['C', '밝게 + 그림 확대', 'rgba(233,238,247,.80)', 1.16, 1.08],
+]
+const SIZES = [128, 60, 40]
+
+let h = ''
+for (const [k, name, line, scale, w] of V){
+  const s = svg(line, scale, w)
+  const url = 'data:image/svg+xml;utf8,' + encodeURIComponent(s)
+  h += `<h2>${k}. ${name}</h2><div class="note">선 ${line} · 그림 배율 ${scale} · 선 굵기 ×${w}</div><div class="row">`
+  for (const px of SIZES)
+    h += `<div class="item"><img class="ico" src="${url}" width="${px}" height="${px}"><span>${px}px</span></div>`
+  // 안드로이드 maskable — 가장자리 10%를 비운 뒤 원형으로 잘린 모습
+  const m = svg(line, scale*0.78, w)
+  const murl = 'data:image/svg+xml;utf8,' + encodeURIComponent(m)
+  h += `<div class="item"><img class="mask" src="${murl}" width="60" height="60"><span>maskable<br>원형 크롭</span></div>`
+  // 홈 화면에 놓인 모습
+  h += `<div class="home"><img class="ico" src="${url}" width="60" height="60">
+        <img class="ico" src="${url}" width="60" height="60" style="filter:saturate(.2)">
+        <span style="font-size:10px;opacity:.75">홈 화면 배경 위</span></div>`
+  h += `</div><hr>`
+}
+document.getElementById('out').innerHTML = h
+</script>

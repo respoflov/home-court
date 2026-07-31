@@ -96,7 +96,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         </Field>
 
         <Field label={t('ownedDumbbell')}>
-          <TextInput value={maxText} onChange={setMaxText} type="number" placeholder="12" />
+          <TextInput value={maxText} onChange={setMaxText} type="number" placeholder="12" suffix="kg" />
         </Field>
 
         <div className="rounded-[12px] px-[14px] py-3 text-[11.5px] leading-[1.6]"
@@ -132,32 +132,61 @@ function Shell({ title, children }: { title: string; children: React.ReactNode }
   )
 }
 
-/** 최초 1회 설치 안내. 홈 화면에 이미 추가돼 있으면 뜨지 않는다. */
-export function InstallSheetBody({ onClose, onNever }: { onClose: () => void; onNever: () => void }) {
+/**
+ * 최초 1회 안내. 홈 화면에서 열었더라도 뜬다.
+ *
+ * 예전에는 홈 화면에 추가하는 법만 담고 있어서, 이미 추가한 사람에게는
+ * 한 번도 뜨지 않았다. 그런데 처음 쓰는 사람에게 필요한 것은 설치법만이 아니라
+ * 이 앱이 무엇이고 어디에 무엇이 있는지다. 그래서 공통 안내를 먼저 두고,
+ * 홈 화면 추가 방법은 아직 브라우저에서 보고 있을 때만 덧붙인다.
+ */
+export function WelcomeSheetBody({ standalone, onClose }: { standalone: boolean; onClose: () => void }) {
   const { t } = useStore()
-  const rows: [string, string][] = [
+  const uses: [string, string][] = [
+    [t('tabToday'), t('welcomeToday')],
+    [t('tabPlaybook'), t('welcomePlaybook')],
+    [t('tabRecord'), t('welcomeRecord')],
+  ]
+  const installs: [string, string][] = [
     [t('iphone'), t('installIos')],
     [t('android'), t('installAndroid')],
   ]
   return (
     <>
-      <h3 className="text-[20px] font-bold tracking-[-0.02em]">{t('installTitle')}</h3>
-      <p className="mt-2 text-[13px] leading-[1.65]" style={{ color: 'var(--ink-2)' }}>{t('installBody')}</p>
-      <div className="mt-4 flex flex-col gap-[11px]">
-        {rows.map(([pf, tx]) => (
-          <div key={pf} className="flex items-start gap-[11px]">
-            <span className="mt-[2px] w-[60px] shrink-0 text-[11px] font-bold" style={{ color: 'var(--ink-3)' }}>{pf}</span>
-            <span className="text-[13px] leading-[1.55]" style={{ color: 'var(--ink-2)' }}>{tx}</span>
+      <h3 className="text-[20px] font-bold tracking-[-0.02em]">{t('welcomeTitle')}</h3>
+      <p className="mt-2 text-[13px] leading-[1.65]" style={{ color: 'var(--ink-2)' }}>{t('welcomeBody')}</p>
+
+      <div className="mt-[18px] max-h-[46vh] overflow-y-auto hide-scroll">
+        {uses.map(([tab, tx]) => (
+          <div key={tab} className="flex items-start gap-[11px] border-b py-[11px] first:border-t"
+               style={{ borderColor: 'var(--line)' }}>
+            <span className="mt-[1px] w-[62px] shrink-0 text-[12px] font-bold" style={{ color: 'var(--buzzer)' }}>{tab}</span>
+            <span className="text-[12.5px] leading-[1.55]" style={{ color: 'var(--ink-2)' }}>{tx}</span>
           </div>
         ))}
+
+        {!standalone && (
+          <div className="mt-[18px]">
+            <div className="text-[13px] font-semibold">{t('installTitle')}</div>
+            <p className="mt-[5px] text-[12.5px] leading-[1.6]" style={{ color: 'var(--ink-3)' }}>{t('installBody')}</p>
+            <div className="mt-[11px] flex flex-col gap-[9px]">
+              {installs.map(([pf, tx]) => (
+                <div key={pf} className="flex items-start gap-[11px]">
+                  <span className="mt-[2px] w-[62px] shrink-0 text-[11px] font-bold" style={{ color: 'var(--ink-3)' }}>{pf}</span>
+                  <span className="text-[12.5px] leading-[1.55]" style={{ color: 'var(--ink-2)' }}>{tx}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
       <div className="mt-4 rounded-[12px] px-[14px] py-3 text-[12.5px] leading-[1.6]"
            style={{ background: 'var(--buzzer-soft)', color: 'var(--buzzer)' }}>
-        {t('installNote')}
+        {t('welcomeMore')}
       </div>
-      <div className="mt-5 flex flex-col gap-2">
+      <div className="mt-5">
         <Cta onClick={onClose}>{t('gotIt')}</Cta>
-        <Cta ghost onClick={onNever}>{t('dontShow')}</Cta>
       </div>
     </>
   )

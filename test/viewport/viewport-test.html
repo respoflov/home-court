@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0B0E15">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="여백 측정">
+<link rel="manifest" href="viewport-test.webmanifest">
+<title>홈코트 · 화면 여백 측정</title>
+<style>
+  html, body, #root { height: 100%; }   /* 앱과 똑같이 맞춘다 */
+  body{margin:0;background:#0B0E15;color:#E9EEF7;
+       font:13px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       overscroll-behavior-y:none}
+  #root{display:flex;flex-direction:column}
+  main{flex:1;min-height:0;overflow-y:auto;padding:max(56px, calc(env(safe-area-inset-top) + 12px)) 18px 18px}
+  h1{font-size:16px;margin:0 0 4px}
+  p{font-size:12px;color:rgba(233,238,247,.55);margin:0 0 16px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  td{padding:7px 0;border-bottom:1px solid rgba(233,238,247,.09);vertical-align:top}
+  td:first-child{color:rgba(233,238,247,.55);white-space:nowrap;padding-right:12px}
+  td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+  .hit{color:#FF4D2E}
+  .ok{color:#FFA31A}
+  button{font:inherit;font-weight:700;width:100%;margin-top:16px;padding:13px;border:0;border-radius:12px;
+         background:#FFA31A;color:#140C00}
+  /* 앱의 탭바와 같은 값 */
+  nav{display:flex;flex-shrink:0;border-top:1px solid rgba(233,238,247,.09);
+      padding:9px 2px max(26px, env(safe-area-inset-bottom))}
+  nav button{flex:1;width:auto;margin:0;padding:2px 0;background:none;color:rgba(233,238,247,.24);
+             font-size:9.5px;font-weight:400;display:flex;flex-direction:column;align-items:center;gap:5px}
+  nav i{display:block;width:19px;height:19px;border:1.8px solid currentColor;border-radius:4px}
+  /* 화면 맨 아래를 기준선으로 보여주는 자 */
+  .ruler{position:fixed;left:0;right:0;bottom:0;height:1px;background:#FF4D2E;z-index:9}
+</style>
+</head>
+<body>
+<div id="root">
+  <main>
+    <h1>화면 여백 측정</h1>
+    <p>홈코트의 탭바 아래 여백이 왜 뜨는지 알아보려고 만든 도구입니다.
+       아래 값을 그대로 캡처해 주세요. 빨간 줄이 화면 맨 아래(<code>innerHeight</code>) 위치입니다.</p>
+    <table id="t"></table>
+    <button onclick="copyAll()">값 복사하기</button>
+    <p id="copied" style="margin-top:10px"></p>
+  </main>
+  <nav>
+    <button><i></i>오늘</button>
+    <button><i></i>원정</button>
+    <button><i></i>플레이북</button>
+    <button><i></i>기록</button>
+    <button><i></i>설정</button>
+  </nav>
+</div>
+<div class="ruler"></div>
+
+<script>
+function px(el, prop){
+  const probe = document.createElement('div')
+  probe.style.cssText = `position:absolute;visibility:hidden;height:${prop}`
+  document.body.appendChild(probe)
+  const v = probe.getBoundingClientRect().height
+  probe.remove()
+  return v
+}
+let rows = []
+function measure(){
+  const nav  = document.querySelector('nav')
+  const navR = nav.getBoundingClientRect()
+  const lbl  = nav.lastElementChild.getBoundingClientRect()
+  const root = document.getElementById('root').getBoundingClientRect()
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+
+  rows = [
+    ['홈 화면 앱으로 열림', standalone ? '예' : '아니오 (브라우저)'],
+    ['window.innerHeight', innerHeight],
+    ['visualViewport.height', visualViewport ? +visualViewport.height.toFixed(1) : '없음'],
+    ['documentElement.clientHeight', document.documentElement.clientHeight],
+    ['screen.height', screen.height],
+    ['devicePixelRatio', devicePixelRatio],
+    ['#root 높이 (h-full)', +root.height.toFixed(1)],
+    ['#root 아래 남는 값', +(innerHeight - root.bottom).toFixed(1)],
+    ['safe-area-inset-top', +px(0,'env(safe-area-inset-top)').toFixed(1)],
+    ['safe-area-inset-bottom', +px(0,'env(safe-area-inset-bottom)').toFixed(1)],
+    ['탭바 높이', +navR.height.toFixed(1)],
+    ['탭바 아래쪽 padding', getComputedStyle(nav).paddingBottom],
+    ['탭바 bottom', +navR.bottom.toFixed(1)],
+    ['화면 바닥 - 탭바 bottom', +(innerHeight - navR.bottom).toFixed(1)],
+    ['화면 바닥 - 라벨 bottom', +(innerHeight - lbl.bottom).toFixed(1)],
+    ['100dvh 라면', +px(0,'100dvh').toFixed(1)],
+    ['100svh 라면', +px(0,'100svh').toFixed(1)],
+    ['100lvh 라면', +px(0,'100lvh').toFixed(1)],
+  ]
+  const t = document.getElementById('t')
+  t.innerHTML = rows.map(([k,v]) => {
+    const bad = (k === '#root 아래 남는 값' && Math.abs(+v) > 1) ||
+                (k === '화면 바닥 - 탭바 bottom' && Math.abs(+v) > 1)
+    return `<tr><td>${k}</td><td class="${bad ? 'hit' : (k.startsWith('화면 바닥') ? 'ok' : '')}">${v}</td></tr>`
+  }).join('')
+}
+function copyAll(){
+  const txt = rows.map(([k,v]) => `${k}\t${v}`).join('\n') + `\n\nUA\t${navigator.userAgent}`
+  navigator.clipboard.writeText(txt).then(
+    () => document.getElementById('copied').textContent = '복사했습니다. 채팅에 붙여넣어 주세요.',
+    () => document.getElementById('copied').textContent = '복사가 막혔습니다. 화면을 캡처해 주세요.')
+}
+measure()
+addEventListener('resize', measure)
+if (visualViewport) visualViewport.addEventListener('resize', measure)
+</script>
+</body>
+</html>

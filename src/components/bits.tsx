@@ -403,26 +403,31 @@ export function TextInput({
   placeholder,
   type = 'text',
   multiline,
+  suffix,
 }: {
   value: string
   onChange: (v: string) => void
   placeholder?: string
   type?: string
   multiline?: boolean
+  /** kg처럼 무엇을 적는 칸인지 필드 안에서 바로 보여주는 단위 */
+  suffix?: string
 }) {
   const cls = 'w-full rounded-[11px] border px-[13px] py-[12px] text-[14px] outline-none'
   const st = { background: 'var(--raised)', borderColor: 'var(--line)', color: 'var(--ink)' }
-  return multiline ? (
-    <textarea
-      className={`${cls} min-h-[64px] resize-none`}
-      style={st}
-      value={value}
-      placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  ) : (
+  if (multiline)
+    return (
+      <textarea
+        className={`${cls} min-h-[64px] resize-none`}
+        style={st}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    )
+  const input = (
     <input
-      className={cls}
+      className={suffix ? `${cls} pr-[42px]` : cls}
       style={st}
       type={type}
       inputMode={type === 'number' ? 'numeric' : undefined}
@@ -430,6 +435,16 @@ export function TextInput({
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
     />
+  )
+  if (!suffix) return input
+  return (
+    <div className="relative">
+      {input}
+      <span className="pointer-events-none absolute top-1/2 right-[13px] -translate-y-1/2 text-[13px] font-semibold"
+            style={{ color: 'var(--ink-3)' }}>
+        {suffix}
+      </span>
+    </div>
   )
 }
 

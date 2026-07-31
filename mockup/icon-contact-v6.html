@@ -1,0 +1,53 @@
+<meta charset="utf-8">
+<title>홈코트 앱 아이콘 v6 — 최종 파일 검수</title>
+<style>
+  body{margin:0;padding:26px 30px;background:#1b1d22;color:#e6e8ee;
+       font:13px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}
+  h1{font-size:17px;margin:0 0 4px}
+  .sub{font-size:12.5px;opacity:.62;margin-bottom:20px;max-width:860px}
+  .sub b{color:#FFC46B}
+  table{border-collapse:collapse}
+  th{font-size:11px;opacity:.5;font-weight:600;padding:0 12px 10px;text-align:center}
+  td{padding:10px 12px;text-align:center;vertical-align:middle}
+  td.name{text-align:left;font-size:12.5px;font-weight:700;white-space:nowrap}
+  td.name em{display:block;font-style:normal;font-weight:400;font-size:11px;opacity:.5;margin-top:2px}
+  .ico{border-radius:22.37%;display:inline-block}
+  .mask{border-radius:50%;display:inline-block}
+  tr+tr td{border-top:1px solid #ffffff12}
+  .home{background:linear-gradient(160deg,#5d6b8a,#8d7f70);padding:10px;border-radius:16px;display:inline-block}
+  .tab{background:#f2f2f7;color:#333;border-radius:8px 8px 0 0;padding:6px 12px;display:inline-flex;
+       align-items:center;gap:7px;font-size:12px}
+</style>
+
+<h1>홈코트 앱 아이콘 v6 — 배포될 파일 그대로</h1>
+<div class="sub">
+  시안이 아니라 <b>실제로 배포되는 파일</b>(<code>public/</code>의 PNG 3종 + <code>favicon.svg</code>)을 불러와 늘어놓은 것입니다.
+  일괄 생성 뒤에는 표본이 아니라 전수를 봅니다.
+</div>
+
+<table>
+  <tr><th></th><th>16px<br>(탭)</th><th>40px<br>(목록)</th><th>60px<br>(홈 화면)</th><th>120px</th><th>원형 크롭</th><th>홈 화면 위</th></tr>
+  <tbody id="out"></tbody>
+</table>
+
+<p style="margin-top:22px;opacity:.6">브라우저 탭에서 보이는 모양</p>
+<span class="tab"><img src="/favicon.svg" width="16" height="16"> 홈코트</span>
+
+<script>
+const F = [
+  ['icon-192.png', '/icon-192.png', '홈 화면 · apple-touch-icon'],
+  ['icon-512.png', '/icon-512.png', 'manifest · purpose any'],
+  ['icon-512-maskable.png', '/icon-512-maskable.png', 'manifest · purpose maskable'],
+  ['favicon.svg', '/favicon.svg', '브라우저 탭'],
+]
+document.getElementById('out').innerHTML = F.map(([n, src, use]) => `
+  <tr>
+    <td class="name">${n}<em>${use}</em></td>
+    <td><img class="ico" src="${src}" width="16" height="16"></td>
+    <td><img class="ico" src="${src}" width="40" height="40"></td>
+    <td><img class="ico" src="${src}" width="60" height="60"></td>
+    <td><img class="ico" src="${src}" width="120" height="120"></td>
+    <td><img class="mask" src="${src}" width="60" height="60"></td>
+    <td><span class="home"><img class="ico" src="${src}" width="60" height="60"></span></td>
+  </tr>`).join('')
+</script>

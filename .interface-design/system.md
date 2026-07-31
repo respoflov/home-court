@@ -29,7 +29,9 @@
 - 설정 행(SItem): 좌 라벨 14px/500 + 부제 11px, 우 값 12.5px + ›. 패딩 15×13
 - 토글: 44×26, 노브 20px, 200ms
 - 소음 마크(NoiseMark): 막대 3개 4/7.5/11px × 3px, 간격 2px. 3단계만 buzzer
-- 히트맵: 셀 26px h, r6, 5주×7일. 강도는 타임아웃/기본/풀 = 30%/55%/100%, 원정은 inset ring
+- 히트맵: 셀 26px h, r6, 5주×7일. 강도는 타임아웃/기본/풀 = 30%/55%/100%
+  - **원정 링은 앰버가 아니라 `color-mix(in srgb, var(--ink) 55%, transparent)` 2px** — 앰버로 두면 풀 경기(같은 앰버) 위에서 완전히 묻힌다. 범례 스와치·날짜 시트의 점도 같은 값 (`test/heatmap/결과-2026-07-31.md`)
+- 앱 아이콘: 로고와 **같은 좌표를 크롭만 달리** 한 것. 48 좌표계 `[0.535, 11.7, 24.6]`, 선 40% × 굵기 0.85배. 원본 `public/favicon.svg`, 굽는 도구 `test/icon/icon-build.html` (좌표를 늘 같이 고칠 것)
 - 운동 중 테두리: rect x5 y5 w365 h802 rx35, stroke 5 → 3초 전 9, pathLength 100 + dasharray
 - 바텀시트: r24 상단, grab 36×4, dim rgba(4,6,10,.72)
 - 드래그 잡힘: buzzer 보더 + lift + scale(1.015), 놓일 자리는 44px 점선

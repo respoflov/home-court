@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Store, useStore } from '@/lib/store'
 import { Splash } from '@/components/Splash'
-import { Onboarding, InstallSheetBody } from '@/components/Onboarding'
+import { Onboarding, WelcomeSheetBody } from '@/components/Onboarding'
 import { Cta, Sheet } from '@/components/bits'
 import { TabBar } from '@/components/TabBar'
 import type { Tab } from '@/components/TabBar'
@@ -148,12 +148,9 @@ function Shell() {
         </div>
       </Sheet>
 
-      {/* 최초 1회 설치 안내. 이미 홈 화면에서 열었다면 띄우지 않는다. */}
-      <Sheet open={!data.installSeen && !standalone} onClose={() => set({ installSeen: true })}>
-        <InstallSheetBody
-          onClose={() => set({ installSeen: true })}
-          onNever={() => set({ installSeen: true })}
-        />
+      {/* 최초 1회 안내. 홈 화면에서 열었더라도 한 번은 띄운다. */}
+      <Sheet open={!data.welcomeSeen} onClose={() => set({ welcomeSeen: true })}>
+        <WelcomeSheetBody standalone={standalone} onClose={() => set({ welcomeSeen: true })} />
       </Sheet>
     </div>
   )

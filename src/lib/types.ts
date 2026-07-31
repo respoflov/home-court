@@ -147,7 +147,12 @@ export interface AppData {
   feels: Record<string, Feel[]>
   awayWeek: number
   onboarded: boolean
-  installSeen: boolean
+  /**
+   * 최초 1회 안내를 봤는가. 예전 이름은 installSeen이었고 설치법만 담았다.
+   * 이제는 앱의 컨셉·사용법까지 담으므로 이름을 맞췄다.
+   * 이전 백업에는 이 값이 없어 새 안내가 한 번 뜬다. 의도한 동작이다.
+   */
+  welcomeSeen: boolean
   /** 운동 중 화면에서 그림을 끈 운동 id. 루틴 전체가 아니라 동작 하나 단위다. */
   figureOff: string[]
 }

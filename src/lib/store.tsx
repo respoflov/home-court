@@ -40,7 +40,7 @@ const EMPTY: AppData = {
   feels: {},
   awayWeek: 1,
   onboarded: false,
-  installSeen: false,
+  welcomeSeen: false,
   figureOff: [],
 }
 
@@ -49,6 +49,9 @@ function load(): AppData {
     const raw = localStorage.getItem(KEY)
     if (!raw) return EMPTY
     const parsed = JSON.parse(raw) as Partial<AppData>
+    // installSeen은 welcomeSeen으로 이름이 바뀌었다. 지워두지 않으면
+    // 쓰이지 않는 값이 백업 파일까지 계속 따라다닌다.
+    delete (parsed as Record<string, unknown>).installSeen
     return {
       ...EMPTY,
       ...parsed,
