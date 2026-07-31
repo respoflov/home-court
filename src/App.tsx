@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Store, useStore } from '@/lib/store'
 import { Splash } from '@/components/Splash'
 import { Onboarding, InstallSheetBody } from '@/components/Onboarding'
-import { Sheet } from '@/components/bits'
+import { Cta, Sheet } from '@/components/bits'
 import { TabBar } from '@/components/TabBar'
 import type { Tab } from '@/components/TabBar'
 import { Today } from '@/screens/Today'
@@ -31,6 +31,9 @@ function Shell() {
   const [size, setSize] = useState(data.settings.defaultSize)
   /** 사용자가 만든 루틴을 오늘의 경기로 골랐을 때만 채워진다 */
   const [pickedId, setPickedId] = useState<string | null>(null)
+  /** 이미 열린 탭을 다시 누르면 그 탭을 처음 상태로 되돌린다 */
+  const [tabReset, setTabReset] = useState(0)
+  const [askCopy, setAskCopy] = useState(false)
 
   const standalone =
     typeof window !== 'undefined' &&
@@ -66,12 +69,21 @@ function Shell() {
   if (modal.kind === 'exercise')
     return <ExerciseForm editing={modal.editing} onBack={() => setModal({ kind: 'none' })} />
 
-  /** 기본 루틴은 지우지 않고 복제해서 고치도록 유도한다 */
+  /**
+   * 기본 루틴은 고칠 수 없으므로 복제해야 한다.
+   * 예전에는 탭하는 즉시 복사본을 만들어서, 오늘의 순서를 눌러볼 때마다
+   * "(복사본)"이 쌓였다. 이제는 물어보고 만든다.
+   */
   const openRoutine = () => {
     if (!current.builtin) {
       setModal({ kind: 'routine', routine: current })
       return
     }
+    setAskCopy(true)
+  }
+
+  const makeCopy = () => {
+    setAskCopy(false)
     const stamp = Date.now()
     const copy: Routine = {
       ...current,
@@ -117,9 +129,24 @@ function Shell() {
           />
         )}
         {tab === 'record' && <Record />}
-        {tab === 'settings' && <Settings />}
+        {tab === 'settings' && <Settings resetSignal={tabReset} />}
       </main>
-      <TabBar tab={tab} onTab={setTab} />
+      <TabBar
+        tab={tab}
+        onTab={(next) => {
+          if (next === tab) setTabReset((n) => n + 1)
+          setTab(next)
+        }}
+      />
+
+      <Sheet open={askCopy} onClose={() => setAskCopy(false)}>
+        <h3 className="text-[20px] font-bold tracking-[-0.02em]">{t('copyAskTitle')}</h3>
+        <p className="mt-2 text-[13px] leading-[1.65]" style={{ color: 'var(--ink-2)' }}>{t('copyAskBody')}</p>
+        <div className="mt-5 flex flex-col gap-2">
+          <Cta onClick={makeCopy}>{t('duplicate')}</Cta>
+          <Cta ghost onClick={() => setAskCopy(false)}>{t('cancel')}</Cta>
+        </div>
+      </Sheet>
 
       {/* 최초 1회 설치 안내. 이미 홈 화면에서 열었다면 띄우지 않는다. */}
       <Sheet open={!data.installSeen && !standalone} onClose={() => set({ installSeen: true })}>

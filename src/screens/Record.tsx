@@ -135,11 +135,20 @@ export function Record() {
                 }
               />
               <span className="min-w-0 flex-1">
-                <span className="block text-[14px] font-semibold">{lang === 'ko' ? l.titleKo : l.titleEn}</span>
+                <span className="flex items-center gap-2 text-[14px] font-semibold">
+                  {lang === 'ko' ? l.titleKo : l.titleEn}
+                  {l.partial && (
+                    <span className="rounded-full px-[7px] py-[2px] text-[10px] font-semibold"
+                          style={{ background: 'color-mix(in srgb, var(--ink) 6%, transparent)', color: 'var(--ink-3)' }}>
+                      {t('quitPartial')}
+                    </span>
+                  )}
+                </span>
                 <span className="tnum block text-[11.5px]" style={{ color: 'var(--ink-3)' }}>
                   {fmtDate(l.date, lang)} · {l.time}
                   {l.meters !== undefined ? ` · ${(l.meters / 1000).toFixed(2)}km` : ''}
                   {l.gapSeconds && l.gapSeconds > 5 ? ` · ${t('estimated')}` : ''}
+                  {l.partial && l.doneMoves != null ? ` · ${l.doneMoves}/${l.totalMoves}${lang === 'ko' ? '동작' : ''}` : ''}
                 </span>
               </span>
               <span className="tnum shrink-0 text-[12px]" style={{ color: 'var(--ink-4)' }}>{mmss(l.seconds)}</span>

@@ -1,14 +1,18 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from '@/lib/store'
-import { Badge, Cta, GroupLabel, NoiseMark, ScreenHead, SBox, SItem, Sheet, Stamp } from '@/components/bits'
+import { Badge, Cta, Fold, NoiseMark, ScreenHead, SBox, SItem, Sheet, Stamp } from '@/components/bits'
 import { fmtWindow } from '@/lib/time'
 import { STEP } from '@/lib/weights'
 import type { LoadGroup } from '@/lib/types'
 
 type Page = 'root' | 'about' | 'howto' | 'remind' | 'install' | 'safety' | 'weights' | 'licenses'
 
-export function Settings() {
+export function Settings({ resetSignal = 0 }: { resetSignal?: number }) {
   const [page, setPage] = useState<Page>('root')
+  // 탭바의 '설정'을 다시 누르면 하위 화면에서 빠져나온다
+  useEffect(() => {
+    setPage('root')
+  }, [resetSignal])
   if (page === 'root') return <Root onGo={setPage} />
   return <Sub page={page} onBack={() => setPage('root')} />
 }
@@ -18,6 +22,9 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
   const { settings } = data
   const [confirmReset, setConfirmReset] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [editWindow, setEditWindow] = useState<'morning' | 'night' | null>(null)
+  /** 한 번에 하나만 펼친다. 다 펼쳐두면 접은 의미가 없다. */
+  const [open, setOpen] = useState<string | null>('grpScreen')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const wakeSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator
@@ -29,8 +36,7 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
          style={{ paddingTop: 'max(56px, calc(env(safe-area-inset-top) + 12px))' }}>
       <ScreenHead kicker={t('settings')} title={t('appName')} />
 
-      <div className="mb-5">
-        <GroupLabel>{t('grpScreen')}</GroupLabel>
+      <Fold label={t('grpScreen')} open={open === 'grpScreen'} onToggle={() => setOpen(open === 'grpScreen' ? null : 'grpScreen')}>
         <SBox>
           <SItem label={t('theme')} value={themeLabel}
                  onClick={() => setSettings({ theme: cycle(settings.theme, ['dark', 'light', 'system'] as const) })} />
@@ -41,10 +47,9 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
           <SItem label={t('bigType')} sub={t('bigTypeSub')} toggle={settings.bigType}
                  onToggle={(v) => setSettings({ bigType: v })} last />
         </SBox>
-      </div>
+      </Fold>
 
-      <div className="mb-5">
-        <GroupLabel>{t('grpSound')}</GroupLabel>
+      <Fold label={t('grpSound')} open={open === 'grpSound'} onToggle={() => setOpen(open === 'grpSound' ? null : 'grpSound')}>
         <SBox>
           <SItem label={t('soundOn')} sub={t('soundSub')} toggle={settings.sound}
                  onToggle={(v) => setSettings({ sound: v })} />
@@ -52,28 +57,28 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
           <SItem label={t('quarterBuzzer')} toggle={settings.quarterBuzzer}
                  onToggle={(v) => setSettings({ quarterBuzzer: v })} last />
         </SBox>
-      </div>
+      </Fold>
 
-      <div className="mb-5">
-        <GroupLabel>{t('grpQuiet')}</GroupLabel>
+      <Fold label={t('grpQuiet')} open={open === 'grpQuiet'} onToggle={() => setOpen(open === 'grpQuiet' ? null : 'grpQuiet')}>
         <SBox>
           <SItem label={t('quietAuto')} sub={t('quietSub')} toggle={settings.quietAuto}
                  onToggle={(v) => setSettings({ quietAuto: v })} />
-          <SItem label={t('morning')} value={fmtWindow(settings.quietMorning.from, settings.quietMorning.to)} />
-          <SItem label={t('night')} value={fmtWindow(settings.quietNight.from, settings.quietNight.to)} last />
+          <SItem label={t('morning')} value={fmtWindow(settings.quietMorning.from, settings.quietMorning.to)}
+                 onClick={() => setEditWindow('morning')} />
+          <SItem label={t('night')} value={fmtWindow(settings.quietNight.from, settings.quietNight.to)}
+                 onClick={() => setEditWindow('night')} last />
         </SBox>
-      </div>
+      </Fold>
 
-      <div className="mb-5">
-        <GroupLabel>{t('grpWorkout')}</GroupLabel>
+      <Fold label={t('grpWorkout')} open={open === 'grpWorkout'} onToggle={() => setOpen(open === 'grpWorkout' ? null : 'grpWorkout')}>
         <SBox>
           <SItem
             label={t('defaultSize')}
             value={{ timeout: t('sizeTimeout'), standard: t('sizeStandard'), full: t('sizeFull') }[settings.defaultSize]}
             onClick={() => setSettings({ defaultSize: cycle(settings.defaultSize, ['timeout', 'standard', 'full'] as const) })}
           />
-          <SItem label={t('restSeconds')} value={`${settings.restSeconds}${t('sec')}`}
-                 onClick={() => setSettings({ restSeconds: cycle(settings.restSeconds, [20, 30, 45, 60]) })} />
+          <SItem label={t('restSeconds')} sub={t('restSecondsSub')} value={`${settings.restSeconds}${t('sec')}`}
+                 onClick={() => setSettings({ restSeconds: cycle(settings.restSeconds, [15, 20, 30, 45]) })} />
           <SItem label={t('weeklyGoal')} value={t('timesPerWeek').replace('%n', String(settings.weeklyGoal))}
                  onClick={() => setSettings({ weeklyGoal: cycle(settings.weeklyGoal, [3, 4, 5, 6, 7]) })} />
           <SItem label={t('weekStart')} sub={t('weekStartSub')}
@@ -90,10 +95,9 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
                  value={`${data.weights.arm} · ${data.weights.torso} · ${data.weights.leg}kg`}
                  onClick={() => onGo('weights')} last />
         </SBox>
-      </div>
+      </Fold>
 
-      <div className="mb-5">
-        <GroupLabel>{t('grpData')}</GroupLabel>
+      <Fold label={t('grpData')} open={open === 'grpData'} onToggle={() => setOpen(open === 'grpData' ? null : 'grpData')}>
         <SBox>
           <SItem label={t('exportBackup')} sub={t('exportSub')} onClick={exportBackup} />
           <SItem label={t('importBackup')} onClick={() => fileRef.current?.click()} />
@@ -114,10 +118,9 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
             e.target.value = ''
           }}
         />
-      </div>
+      </Fold>
 
-      <div className="mb-5">
-        <GroupLabel>{t('grpGuide')}</GroupLabel>
+      <Fold label={t('grpGuide')} open={open === 'grpGuide'} onToggle={() => setOpen(open === 'grpGuide' ? null : 'grpGuide')}>
         <SBox>
           <SItem label={t('howToInstall')} sub={t('howToInstallSub')} onClick={() => onGo('install')} />
           <SItem label={t('howToRemind')} sub={t('howToRemindSub')} onClick={() => onGo('remind')} />
@@ -127,9 +130,42 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
           <SItem label={t('licenses')} sub="Pretendard · Lucide" onClick={() => onGo('licenses')} />
           <SItem label={t('version')} value={__APP_VERSION__} last />
         </SBox>
-      </div>
+      </Fold>
 
       <div className="pb-10 pt-2"><Stamp absolute={false} /></div>
+
+      {/* 조용 모드 시간대는 값만 보여주고 못 고치던 것을 편집 가능하게 */}
+      <Sheet open={!!editWindow} onClose={() => setEditWindow(null)}>
+        {editWindow && (
+          <>
+            <h3 className="mb-4 text-[20px] font-bold tracking-[-0.02em]">
+              {editWindow === 'morning' ? t('morning') : t('night')}
+            </h3>
+            {(['from', 'to'] as const).map((k) => {
+              const w = editWindow === 'morning' ? settings.quietMorning : settings.quietNight
+              const v = `${String(Math.floor(w[k] / 60)).padStart(2, '0')}:${String(w[k] % 60).padStart(2, '0')}`
+              return (
+                <div key={k} className="mb-3 flex items-center justify-between">
+                  <span className="text-[14px] font-medium">{k === 'from' ? t('quietFrom') : t('quietTo')}</span>
+                  <input
+                    type="time"
+                    value={v}
+                    onChange={(e) => {
+                      const [h, m] = e.target.value.split(':').map(Number)
+                      if (Number.isNaN(h)) return
+                      const next = { ...w, [k]: h * 60 + m }
+                      setSettings(editWindow === 'morning' ? { quietMorning: next } : { quietNight: next })
+                    }}
+                    className="rounded-[11px] border px-3 py-2 text-[15px]"
+                    style={{ background: 'var(--raised)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  />
+                </div>
+              )
+            })}
+            <div className="mt-4"><Cta onClick={() => setEditWindow(null)}>{t('save')}</Cta></div>
+          </>
+        )}
+      </Sheet>
 
       <Sheet open={confirmReset} onClose={() => setConfirmReset(false)}>
         <h3 className="text-[20px] font-bold tracking-[-0.02em]" style={{ color: 'var(--buzzer-hot)' }}>

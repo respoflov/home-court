@@ -225,6 +225,43 @@ export function Badge({
   )
 }
 
+/** 접었다 펴는 설정 그룹. 설정이 길어져 한 화면에 다 두면 스크롤이 끝없다. */
+export function Fold({
+  label,
+  open,
+  onToggle,
+  children,
+}: {
+  label: string
+  open: boolean
+  onToggle: () => void
+  children: ReactNode
+}) {
+  return (
+    <div className="mb-[10px]">
+      <button
+        onClick={onToggle}
+        className="press flex w-full items-center gap-2 rounded-[15px] border px-[15px] py-[14px] text-left"
+        style={{
+          background: 'var(--surface)',
+          borderColor: open ? 'var(--buzzer)' : 'var(--line)',
+        }}
+        aria-expanded={open}
+      >
+        <span className="flex-1 text-[14px] font-semibold" style={{ color: open ? 'var(--buzzer)' : 'var(--ink)' }}>
+          {label}
+        </span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+             strokeLinecap="round" strokeLinejoin="round" aria-hidden
+             style={{ color: 'var(--ink-4)', transform: open ? 'rotate(180deg)' : undefined, transition: 'transform .2s' }}>
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      {open && <div className="fade-up mt-[8px]">{children}</div>}
+    </div>
+  )
+}
+
 export function GroupLabel({ children }: { children: ReactNode }) {
   return (
     <div className="mb-[9px] text-[10.5px] font-bold tracking-[0.12em]" style={{ color: 'var(--ink-4)' }}>

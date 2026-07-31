@@ -73,6 +73,10 @@ export interface SessionLog {
   seconds: number
   quarters?: number
   size?: 'timeout' | 'standard' | 'full'
+  /** 중간에 그만뒀는지. 한 것을 없던 일로 만들지 않는다. */
+  partial?: boolean
+  doneMoves?: number
+  totalMoves?: number
   /** 원정 전용 */
   awayWeek?: number
   /** GPS를 켰을 때만 */

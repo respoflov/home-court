@@ -45,8 +45,8 @@ export const FIGURES: Record<string, Figure> = {
   /* ── A. 모빌리티 / 웜업 ─────────────────────────── */
   'cat-cow': {
     ground: G_FLOOR,
-    a: QUAD_BASE + torso('M42 62 Q58 60 74 63'),
-    b: QUAD_BASE + cue('M42 62 Q58 44 74 63'),
+    a: QUAD_BASE + torso('M42 62 Q58 44 74 63'),
+    b: QUAD_BASE + cue('M42 62 Q58 78 74 63'),
   },
   'thread-needle': {
     ground: G_FLOOR,
@@ -208,37 +208,37 @@ export const FIGURES: Record<string, Figure> = {
       cue('M43 64 L30 56 L16 52') +
       cue('M74 64 L90 58 L104 56'),
   },
+  // 무릎 플랭크에서 시작해 발 플랭크로. 몸통이 일직선인 것이 요점이라 몸통을 앰버로.
   plank: {
     ground: G_FLOOR,
     a:
-      head(24, 74) +
-      torso('M33 78 L74 90') +
-      limb('M36 80 L36 98') +
-      far('M40 81 L40 98') +
-      limb('M74 90 L86 98') +
-      far('M74 92 L88 99'),
+      head(22, 72) +
+      torso('M31 76 L68 90') +
+      limb('M34 78 L34 98') +
+      far('M38 79 L38 98') +
+      limb('M68 90 L80 98') +
+      foot('M76 100 H92'),
     b:
-      head(24, 74) +
-      cue('M33 78 L74 90') +
-      limb('M36 80 L36 98') +
-      far('M40 81 L40 98') +
-      limb('M74 90 L86 98') +
-      far('M74 92 L88 99'),
+      head(22, 76) +
+      cue('M31 80 L90 94') +
+      limb('M34 82 L34 98') +
+      far('M38 83 L38 98') +
+      limb('M90 94 L98 100'),
   },
   'side-plank': {
     ground: G_FLOOR,
     a:
-      head(26, 68) +
-      torso('M35 74 L76 88') +
-      limb('M38 76 L34 98') +
-      limb('M76 88 L62 98') +
-      far('M76 90 L88 98'),
+      head(26, 74) +
+      torso('M35 80 L72 94') +
+      limb('M38 82 L34 98') +
+      limb('M72 94 L58 100') +
+      far('M72 96 L84 100'),
     b:
       head(26, 62) +
-      cue('M35 68 L76 86') +
+      cue('M35 68 L72 88') +
       limb('M38 70 L34 98') +
-      limb('M76 86 L62 98') +
-      far('M76 88 L88 98'),
+      limb('M72 88 L58 100') +
+      far('M72 90 L84 100'),
   },
   'single-glute-bridge': {
     ground: G_FLOOR,
@@ -274,18 +274,19 @@ export const FIGURES: Record<string, Figure> = {
       foot('M52 108 H68') +
       bellSm(69, 72),
   },
+  // 어깨와 발을 살짝 들고 허리를 바닥에 붙이는 것이 전부인 동작
   'hollow-hold': {
     ground: G_FLOOR,
     a:
       SUPINE_HEAD +
-      torso('M34 88 L68 92') +
-      limb('M40 88 L40 74') +
-      limb('M66 91 L70 76 L84 74'),
+      torso('M34 90 L66 92') +
+      limb('M40 88 L34 78') +
+      limb('M66 92 L74 78 L86 76'),
     b:
-      head(28, 78) +
-      cue('M37 82 L68 90') +
-      limb('M42 82 L46 70') +
-      limb('M66 89 L72 74 L86 72'),
+      head(28, 80) +
+      cue('M37 84 L66 90') +
+      limb('M42 82 L34 72') +
+      limb('M66 90 L76 76 L88 70'),
   },
 
   /* ── C. 하체 ──────────────────────────────────── */

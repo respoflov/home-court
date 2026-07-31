@@ -26,8 +26,21 @@ export function secondsFor(x: Exercise, amount: number): number {
   return x.mode === 'time' ? amount : Math.max(25, Math.round(amount * 4))
 }
 
-function needsRestAfter(x: Exercise): boolean {
-  return x.part !== 'warmup' && x.part !== 'cooldown'
+/**
+ * 운동 종류마다 필요한 휴식이 다르다. 헬스장이 아니므로 근력도 30초까지 갈 이유가 없다.
+ * 설정의 '휴식 시간'을 기준으로 비율을 곱해 쓴다.
+ */
+const REST_RATIO: Record<Exercise['part'], number> = {
+  warmup: 0.4,   // 자세 바꾸는 시간이면 충분하다
+  cooldown: 0.4,
+  core: 0.75,
+  lower: 1,
+  upper: 1,
+  cardio: 1,
+}
+
+export function restFor(x: Exercise, base: number): number {
+  return Math.max(5, Math.round(base * REST_RATIO[x.part]))
 }
 
 export function buildSteps(
@@ -69,9 +82,9 @@ export function buildSteps(
             askFeel: !!x.load && side !== 'left',
           })
         }
-        // 좌우 사이에는 쉬지 않는다 — 다리를 바꾸는 것 자체가 쉬는 시간이다.
-        // 마지막 세트 뒤에도 넣지 않는다 — 다음 동작으로 넘어가는 것이 곧 휴식이다.
-        if (needsRestAfter(x) && s < setTotal - 1) {
+        // 좌우 사이에는 쉬지 않는다. 다리를 바꾸는 것 자체가 쉬는 시간이다.
+        // 세트 사이는 물론이고 동작이 끝난 뒤에도 넣는다. 손으로 멈춰 쉬게 두지 않는다.
+        {
           steps.push({
             kind: 'rest',
             exercise: x,
@@ -81,7 +94,7 @@ export function buildSteps(
             quarterTotal: quarters.length,
             setIndex: s,
             setTotal,
-            seconds: restSeconds,
+            seconds: restFor(x, restSeconds),
           })
         }
       }

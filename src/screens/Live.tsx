@@ -40,6 +40,10 @@ export function Live({
   const [feelFor, setFeelFor] = useState<Exercise | null>(null)
   const [raiseFor, setRaiseFor] = useState<Exercise | null>(null)
   const [finished, setFinished] = useState(false)
+  /** ready: 준비 되셨나요 → countdown: 3·2·1 → run */
+  const [phase, setPhase] = useState<'ready' | 'countdown' | 'run'>('ready')
+  const [lead, setLead] = useState(3)
+  const [confirmQuit, setConfirmQuit] = useState(false)
 
   const startedAt = useRef(new Date())
   const lastTick = useRef(-1)
@@ -89,26 +93,65 @@ export function Live({
     }, 100)
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [i, paused, done, raiseFor, settings.sound, settings.countdown])
+  }, [phase, i, paused, done, raiseFor, settings.sound, settings.countdown])
+
+  // 3·2·1 카운트다운. 자세를 잡을 시간을 주고 나서 시계가 돈다.
+  useEffect(() => {
+    if (phase !== 'countdown') return
+    if (lead <= 0) {
+      deadline.current = Date.now() + (steps[0]?.seconds ?? 0) * 1000
+      setRemain(steps[0]?.seconds ?? 0)
+      lastTick.current = -1
+      startedAt.current = new Date()
+      setPhase('run')
+      return
+    }
+    if (settings.sound) sound.tick()
+    const id = setTimeout(() => setLead((n) => n - 1), 1000)
+    return () => clearTimeout(id)
+  }, [phase, lead, settings.sound, steps])
+
+  /** 끝까지 갔든 중간에 그만뒀든 한 곳에서 기록한다. 한 것을 없던 일로 만들지 않는다. */
+  const writeLog = useCallback(
+    (partial: boolean) => {
+      const secs = Math.round((Date.now() - startedAt.current.getTime()) / 1000)
+      const doneSteps = steps.slice(0, Math.max(0, iRef.current))
+      const log: SessionLog = {
+        id: `s${Date.now()}`,
+        side: 'home',
+        routineId,
+        titleKo: title,
+        titleEn,
+        date: ymd(startedAt.current),
+        time: hm(startedAt.current),
+        seconds: secs,
+        quarters: new Set((partial ? doneSteps : steps).map((s) => s.quarterIndex)).size,
+        size,
+        partial: partial || undefined,
+        doneMoves: partial
+          ? new Set(doneSteps.filter((s) => s.kind === 'work').map((s) => s.exercise.id)).size
+          : undefined,
+        totalMoves: partial
+          ? new Set(steps.filter((s) => s.kind === 'work').map((s) => s.exercise.id)).size
+          : undefined,
+      }
+      addLog(log)
+    },
+    [addLog, routineId, size, steps, title, titleEn],
+  )
 
   const finishSession = useCallback(() => {
-    const secs = Math.round((Date.now() - startedAt.current.getTime()) / 1000)
-    const log: SessionLog = {
-      id: `s${Date.now()}`,
-      side: 'home',
-      routineId,
-      titleKo: title,
-      titleEn,
-      date: ymd(startedAt.current),
-      time: hm(startedAt.current),
-      seconds: secs,
-      quarters: new Set(steps.map((s) => s.quarterIndex)).size,
-      size,
-    }
-    addLog(log)
+    writeLog(false)
     if (settings.sound) sound.finish()
     setFinished(true)
-  }, [addLog, routineId, settings.sound, size, steps, title, titleEn])
+  }, [settings.sound, writeLog])
+
+  const quit = useCallback(() => {
+    // 10초도 안 했으면 기록하지 않는다. 잘못 눌러 들어온 것까지 남길 이유는 없다.
+    const secs = Math.round((Date.now() - startedAt.current.getTime()) / 1000)
+    if (phase === 'run' && secs > 10 && iRef.current > 0) writeLog(true)
+    onExit(false)
+  }, [onExit, phase, writeLog])
 
   const next = useCallback(() => {
     const at = iRef.current
@@ -188,6 +231,40 @@ export function Live({
   }
 
   if (done || !step) return null
+
+  if (phase !== 'run') {
+    return (
+      <div className="fade-up flex h-full flex-col items-center justify-center gap-7 px-8 text-center"
+           style={{ background: 'var(--void)' }}>
+        {phase === 'ready' ? (
+          <>
+            <div className="text-[11px] font-bold tracking-[0.12em]" style={{ color: 'var(--buzzer)' }}>
+              {lang === 'ko' ? title : titleEn}
+            </div>
+            <div className="text-[32px] font-bold tracking-[-0.03em]">{t('readyTitle')}</div>
+            <div className="tnum text-[14px]" style={{ color: 'var(--ink-3)' }}>
+              {totalMin}
+              {t('min')} · {new Set(steps.filter((s) => s.kind === 'work').map((s) => s.exercise.id)).size}
+              {lang === 'ko' ? t('moves') : ' ' + t('moves')}
+            </div>
+            <div className="mt-3 flex w-full max-w-[280px] flex-col gap-2">
+              <Cta onClick={() => { sound.primeAudio(); setPhase('countdown') }}>{t('readyYes')}</Cta>
+              <Cta ghost onClick={() => onExit(false)}>{t('readyNo')}</Cta>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-[14px]" style={{ color: 'var(--ink-3)' }}>{t('getSet')}</div>
+            <div className="tnum text-[120px] leading-none font-extrabold tracking-[-0.05em]"
+                 style={{ color: 'var(--buzzer)' }}>
+              {lead}
+            </div>
+            <div className="text-[15px] font-semibold">{exName(steps[0].exercise, lang)}</div>
+          </>
+        )}
+      </div>
+    )
+  }
 
   const label = lang === 'ko' ? step.quarterLabelKo : step.quarterLabelEn
   const isRest = step.kind === 'rest'
@@ -332,12 +409,13 @@ export function Live({
 
           {/* 주의는 첫 세트에서만. 매 세트 반복하면 잔소리가 되고 결국 안 읽는다. */}
           {!isRest && step.setIndex === 0 && step.side !== 'right' && warn && (
-            <div
-              className="mt-[10px] flex max-w-[280px] items-start gap-[6px] text-left text-[12px] leading-[1.5]"
-              style={{ color: 'var(--buzzer)' }}
-            >
-              <span className="mt-[1px] shrink-0 font-bold">{t('watchOut')}</span>
-              <span style={{ color: 'var(--ink-2)' }}>{warn}</span>
+            <div className="mt-[26px] max-w-[290px] text-center">
+              <div className="text-[12px] font-bold" style={{ color: 'var(--buzzer)' }}>
+                {t('watchOut')}
+              </div>
+              <div className="mt-[5px] text-[12.5px] leading-[1.55]" style={{ color: 'var(--ink-2)' }}>
+                {warn}
+              </div>
             </div>
           )}
         </div>
@@ -353,7 +431,7 @@ export function Live({
           )}
           <div className="flex items-center gap-4">
             <button
-              onClick={() => onExit(false)}
+              onClick={() => setConfirmQuit(true)}
               className="press rounded-full border px-4 py-[10px] text-[12px] font-semibold"
               style={{ borderColor: 'var(--line)', color: 'var(--ink-4)' }}
             >
@@ -380,6 +458,15 @@ export function Live({
           </div>
         </div>
       </div>
+
+      <Sheet open={confirmQuit} onClose={() => setConfirmQuit(false)}>
+        <h3 className="text-[20px] font-bold tracking-[-0.02em]">{t('quitConfirm')}</h3>
+        <p className="mt-2 text-[13px] leading-[1.65]" style={{ color: 'var(--ink-2)' }}>{t('quitConfirmBody')}</p>
+        <div className="mt-5 flex flex-col gap-2">
+          <Cta ghost danger onClick={quit}>{t('quitYes')}</Cta>
+          <Cta onClick={() => setConfirmQuit(false)}>{t('keepGoing')}</Cta>
+        </div>
+      </Sheet>
 
       {/* 세트 피드백 — 휴식은 어차피 비어 있는 시간이라 여기서 묻는다 */}
       <Sheet open={!!feelFor} onClose={() => setFeelFor(null)}>
