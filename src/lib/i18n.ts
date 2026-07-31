@@ -155,18 +155,18 @@ const D = {
   run: ['달리기', 'Run'],
   sets: ['세트', 'sets'],
   startAway: ['원정 시작', 'Start away game'],
-  gpsLabel: ['GPS로 거리와 궤적 남기기', 'Record distance and track with GPS'],
+  gpsLabel: ['GPS로 거리와 지나온 길 남기기', 'Record distance and route with GPS'],
   gpsSub: [
     '화면을 켜고 앱을 앞에 둬야 기록됩니다',
     'Keep the screen on and the app in front',
   ],
   gpsMapNote: [
-    '배경 지도는 없습니다. 지나온 궤적의 모양만 그립니다.',
-    'There is no base map. It draws the shape of the route only.',
+    '기록에서 지도 위에 지나온 길을 볼 수 있습니다. 지도는 카카오맵이라 인터넷이 있어야 뜹니다. 안 뜨면 궤적 모양만 보여드립니다.',
+    'Your route appears on a map in Stats. The map is Kakao Maps, so it needs a connection. Without one you still get the shape of the route.',
   ],
   gpsNote: [
-    '화면이 꺼지면 위치 수신이 멈춥니다. 꺼진 구간은 직선으로 추정됨이라고 기록에 남깁니다.',
-    'Location stops when the screen turns off. Those stretches are logged as a straight-line estimate.',
+    '화면이 꺼지면 위치 수신이 멈춥니다. 꺼진 구간은 지도에서 점선으로 표시하고, 거리도 그만큼 실제보다 짧습니다.',
+    'Location stops when the screen turns off. Those stretches show as a dashed line on the map, and the distance falls short by that much.',
   ],
   program4: ['4주 프로그램', 'Four-week program'],
   inProgress: ['진행 중', 'In progress'],
@@ -191,7 +191,16 @@ const D = {
   deleteLog: ['이 기록 지우기', 'Delete this session'],
   deleteLogAsk: ['이 기록을 지울까요?', 'Delete this session?'],
   deleteLogBody: ['지운 기록은 되돌릴 수 없습니다.', 'A deleted session cannot be restored.'],
-  routeShape: ['지나온 궤적', 'Route shape'],
+  routeShape: ['지나온 길', 'Where you ran'],
+  mapLoading: ['지도를 불러오는 중', 'Loading the map'],
+  mapFailed: [
+    '지도를 불러오지 못했습니다. 궤적 모양만 보여드려요.',
+    'The map could not load, so here is just the shape of your route.',
+  ],
+  trackBreakNote: [
+    '점선 구간은 화면이 꺼져 있어 기록되지 않았습니다. 두 지점을 곧게 이었고, 거리도 그만큼 실제보다 짧습니다.',
+    'The dashed part was not recorded because the screen was off. Those two points are joined in a straight line, so the distance falls short by that much.',
+  ],
   prevMonth: ['이전 달', 'Previous month'],
   nextMonth: ['다음 달', 'Next month'],
 

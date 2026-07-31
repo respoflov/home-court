@@ -1,0 +1,245 @@
+<meta charset="utf-8">
+<title>러닝 궤적 — 지도 연동 검토 v2</title>
+<style>
+  :root{
+    --void:#0B0E15; --surface:#12161F;
+    --line:rgba(233,238,247,.09); --line2:rgba(233,238,247,.16);
+    --ink:#E9EEF7; --ink3:rgba(233,238,247,.40); --ink4:rgba(233,238,247,.24);
+    --buzzer:#FFA31A; --hot:#FF4D2E;
+  }
+  body{margin:0;padding:26px 30px;background:#16181d;color:var(--ink);
+       font:13.5px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}
+  h1{font-size:18px;margin:0 0 6px}
+  .lead{font-size:12.5px;color:var(--ink3);max-width:920px;margin-bottom:6px}
+  .lead b{color:#FFC46B}
+  .v{font-size:11.5px;color:var(--ink4);margin-bottom:22px}
+  .row{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+  .col{width:302px}
+  .cap{font-size:12.5px;font-weight:700;margin:0}
+  .cap span{display:block;font-weight:400;font-size:11px;color:var(--ink3);margin-top:2px}
+  .phone{background:var(--void);border:1px solid var(--line2);border-radius:26px;padding:15px 14px;margin-top:9px}
+  .card{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+  .pad{padding:11px 12px}
+  .hdr{display:flex;align-items:center;gap:9px}
+  .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;
+       box-shadow:inset 0 0 0 1.5px rgba(233,238,247,.55)}
+  .t1{font-size:13.5px;font-weight:600}
+  .t2{font-size:11px;color:var(--ink3)}
+  .foot{font-size:11px;color:var(--ink4);margin-top:8px}
+  .warn{font-size:11px;color:var(--buzzer);margin-top:9px;display:flex;gap:7px;align-items:flex-start;
+        line-height:1.5}
+  .warn i{flex:0 0 auto;width:3px;align-self:stretch;background:var(--buzzer);border-radius:2px;opacity:.6}
+  .note{font-size:11.5px;color:var(--ink3);margin-top:11px}
+  .note b{color:#FFC46B;font-weight:600}
+  table{border-collapse:collapse;margin-top:30px;font-size:12.5px;max-width:1000px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--surface);font-size:11.5px;color:var(--ink3);font-weight:700}
+  td b{color:#FFC46B;font-weight:600}
+  .last{margin-top:14px;font-size:12.5px;color:var(--ink3);max-width:1000px;
+        border-left:3px solid var(--line2);padding-left:13px}
+  .last b{color:#FFC46B}
+</style>
+
+<h1>러닝 궤적 — 지금 것과 지도를 붙였을 때</h1>
+<div class="lead">
+  <b>지도 타일은 진짜가 아니라 흉내낸 것입니다.</b> 카카오·OSM을 실제로 붙이려면 키 등록과 의존성 추가가 필요해
+  결정 전에는 넣지 않았습니다. 보실 것은 타일의 생김새가 아니라
+  <b>화면이 꺼져 있던 구간이 지도 위에서 어떻게 보이는가</b>입니다.
+</div>
+<div class="v">v2 — v1에서 지도가 모눈종이처럼 보이고 경로가 도로를 따라가지 않아, 요점이 드러나지 않던 것을 고침</div>
+
+<div class="row">
+
+  <div class="col">
+    <div class="cap">A. 지금 (v1.4.0)<span>좌표를 정규화한 SVG 궤적. 배경 없음</span></div>
+    <div class="phone">
+      <div class="card"><div class="pad">
+        <div class="hdr"><i class="dot"></i>
+          <div><div class="t1">원정</div><div class="t2">06:20 · 28:14 · 3.10km</div></div></div>
+        <div style="display:flex;gap:12px;align-items:center;border:1px solid var(--line);
+                    border-radius:12px;padding:8px 11px;margin-top:9px">
+          <svg width="66" height="66" viewBox="0 0 100 100">
+            <path id="pA" fill="none" stroke="var(--buzzer)" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span style="font-size:11.5px;color:var(--ink3)">지나온 궤적</span>
+        </div>
+        <div class="foot">02:06 구간은 추정입니다</div>
+      </div></div>
+    </div>
+    <div class="note">
+      모양만 있고 <b>어디인지가 없습니다.</b> 끊긴 구간도 그냥 선이라
+      실제로 달린 길인지 이어붙인 자리인지 구별되지 않습니다.
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="cap">B. 지도 위에 그리기<span>끊긴 구간을 따로 표시하지 않으면</span></div>
+    <div class="phone">
+      <div class="card">
+        <div id="mapB"></div>
+        <div class="pad"><div class="hdr"><i class="dot"></i>
+          <div><div class="t1">원정</div><div class="t2">06:20 · 28:14 · 3.10km</div></div></div></div>
+      </div>
+    </div>
+    <div class="note">
+      길을 따라 달렸는데 <b>건물을 뚫고 지나간 대각선</b>이 생깁니다.
+      배경이 없을 때는 안 보이던 오류가 지도를 붙이는 순간 드러납니다.
+      앱을 의심하게 되는 화면은 바로 이것입니다.
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="cap">C. 지도 위에 그리되 끊긴 구간을 밝히기<span>점선으로 두고 이유를 적음</span></div>
+    <div class="phone">
+      <div class="card">
+        <div id="mapC"></div>
+        <div class="pad">
+          <div class="hdr"><i class="dot"></i>
+            <div><div class="t1">원정</div><div class="t2">06:20 · 28:14 · 3.10km</div></div></div>
+          <div class="warn"><i></i><span>점선 구간 02:06은 화면이 꺼져 있어 기록되지 않았습니다.
+            두 지점을 곧게 이었고, 거리도 그만큼 실제보다 짧습니다.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      거짓 거리를 사실처럼 보여주지 않는다는 <b>이 프로젝트의 기존 원칙</b>과 맞습니다.
+      다만 정직해질수록 <b>제약이 기록마다 눈에 띈다</b>는 것도 사실입니다.
+    </div>
+  </div>
+
+</div>
+
+<table>
+  <tr><th style="width:110px"></th><th>Kakao Maps JS SDK</th><th>Leaflet + OpenStreetMap</th></tr>
+  <tr><td>국내 지도</td>
+      <td><b>정확합니다.</b> 골목·건물·상호까지 나옵니다</td>
+      <td>도로는 나오지만 국내 디테일이 떨어집니다</td></tr>
+  <tr><td>키·등록</td>
+      <td>JavaScript 키가 필요합니다. <b>07번 키가 이미 <code>https://respoflov.github.io</code> 오리진으로 등록돼 있고 08번도 같은 오리진</b>이라, 그대로 쓰면 등록 없이 동작할 가능성이 높습니다(미검증). 다만 07번 앱의 키를 08번이 함께 쓰는 셈이라 앱을 하나 더 만드는 편이 깔끔합니다</td>
+      <td><b>키가 없습니다.</b> 등록 절차 자체가 없습니다</td></tr>
+  <tr><td>의존성</td>
+      <td>SDK를 스크립트로 불러옵니다. npm 패키지가 아닙니다</td>
+      <td><code>leaflet</code> 패키지를 추가합니다 (약 150KB)</td></tr>
+  <tr><td>오프라인</td>
+      <td><b>안 됩니다.</b> 타일을 못 받으면 빈 자리가 됩니다</td>
+      <td><b>안 됩니다.</b> 같습니다</td></tr>
+  <tr><td>사용 정책</td>
+      <td>카카오 약관을 따릅니다. 개인 앱 수준에서는 문제가 없습니다</td>
+      <td>OSM 공용 타일 서버는 <b>대량 사용을 금지</b>합니다. 개인 앱이면 괜찮지만 출처 표기가 필수입니다</td></tr>
+  <tr><td>앱 톤</td>
+      <td>밝은 지도라 다크 화면 안에서 <b>혼자 밝게 뜹니다</b></td>
+      <td>같은 문제입니다. 다크 타일을 쓰려면 별도 제공자가 필요하고 대개 유료입니다</td></tr>
+  <tr><td>배경 추적 한계</td>
+      <td colspan="2"><b>둘 다 그대로입니다.</b> 화면을 끄면 좌표가 들어오지 않습니다
+      (실측: 백그라운드 3분 52초 동안 0회 수신 · <code>test/gps/결과-2026-07-30.md</code>).
+      지도를 붙여도 이 구멍은 메워지지 않고 <b>더 잘 보이게 될 뿐</b>입니다</td></tr>
+</table>
+
+<div class="last">
+  <b>넷째 선택지: 지도를 붙이지 않고 지금의 SVG 궤적을 화면에서 내리는 것.</b>
+  좌표 저장은 그대로 두므로 나중에 언제든 지도를 붙일 수 있고, 애매한 화면이 사라집니다.
+  "애매한 채로 두느니 빼는 게 낫다"는 이 프로젝트의 기존 원칙과 가장 가깝습니다.
+</div>
+
+<script>
+/* ── 흉내낸 지도 ──────────────────────────────────
+   실제 타일이 아니다. "밝은 배경 · 도로 격자 · 건물 블록"만 있으면
+   직선이 건물을 가로지르는 것이 보이고, 그게 이 목업의 전부다. */
+const W = 274, H = 168
+const VROAD = [30, 92, 150, 212]          // 세로 도로 x
+const HROAD = [22, 62, 102, 142]          // 가로 도로 y
+const RW = 9                              // 도로 폭
+
+/* 경로는 도로를 따라간다. 화면이 꺼진 구간을 빼면 P3 → P6이 곧게 이어진다. */
+const P = [
+  [30, 150], [30, 62], [150, 62], [150, 22],   // P0~P3
+  [212, 22], [212, 102], [92, 102],            // P4~P6 — 이 구간이 기록되지 않았다
+  [92, 150],                                   // P7
+]
+const GAP_FROM = 3, GAP_TO = 6
+
+/* GPS는 자로 그은 듯 곧지 않다. 조금 흔들어야 기계 도면처럼 보이지 않는다. */
+function wobble(a, b, step = 9){
+  const out = [], dx = b[0]-a[0], dy = b[1]-a[1]
+  const n = Math.max(1, Math.round(Math.hypot(dx, dy)/step))
+  for (let i = 0; i <= n; i++){
+    const t = i/n, j = (i === 0 || i === n) ? 0 : 1.5
+    out.push([a[0]+dx*t + (Math.random()-.5)*j, a[1]+dy*t + (Math.random()-.5)*j])
+  }
+  return out
+}
+function chain(pts){
+  let out = []
+  for (let i = 0; i < pts.length-1; i++){
+    const seg = wobble(pts[i], pts[i+1])
+    out = out.concat(i ? seg.slice(1) : seg)
+  }
+  return out
+}
+const d = (pp) => pp.map((p,i) => `${i?'L':'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ')
+
+const RECORDED_BEFORE = chain(P.slice(0, GAP_FROM+1))
+const RECORDED_AFTER  = chain(P.slice(GAP_TO))
+const GAP_LINE        = [P[GAP_FROM], P[GAP_TO]]
+
+function mapSVG(showGap){
+  // 건물 블록 — 도로 사이 칸을 채운다
+  const xs = [0, ...VROAD, W], ys = [0, ...HROAD, H]
+  let blocks = ''
+  for (let i = 0; i < xs.length-1; i++)
+    for (let j = 0; j < ys.length-1; j++){
+      const x0 = xs[i] + (i ? RW/2 : 0) + 2, x1 = xs[i+1] - (i+1 < xs.length-1 ? RW/2 : 0) - 2
+      const y0 = ys[j] + (j ? RW/2 : 0) + 2, y1 = ys[j+1] - (j+1 < ys.length-1 ? RW/2 : 0) - 2
+      if (x1-x0 < 6 || y1-y0 < 6) continue
+      const park = (i + j) % 5 === 2
+      blocks += `<rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" rx="2"
+                  fill="${park ? '#cfdcc4' : '#dcd7cd'}"/>`
+      if (!park) blocks += `<rect x="${x0+4}" y="${y0+4}" width="${Math.max(4,(x1-x0)*.42)}"
+                  height="${Math.max(4,(y1-y0)*.4)}" rx="1.5" fill="#d1cbc0"/>`
+    }
+  let roads = ''
+  for (const x of VROAD) roads += `<line x1="${x}" y1="-4" x2="${x}" y2="${H+4}"/>`
+  for (const y of HROAD) roads += `<line x1="-4" y1="${y}" x2="${W+4}" y2="${y}"/>`
+
+  const gapStroke = showGap
+    ? `stroke="var(--hot)" stroke-width="3.4" stroke-dasharray="6 5"`
+    : `stroke="var(--buzzer)" stroke-width="4"`
+  const mid = [(GAP_LINE[0][0]+GAP_LINE[1][0])/2, (GAP_LINE[0][1]+GAP_LINE[1][1])/2]
+
+  return `<svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block">
+    <rect width="${W}" height="${H}" fill="#e7e2d9"/>
+    ${blocks}
+    <g stroke="#fbfaf7" stroke-width="${RW}" stroke-linecap="round">${roads}</g>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="${d(RECORDED_BEFORE)}" stroke="var(--buzzer)" stroke-width="4"/>
+      <path d="${d(GAP_LINE)}" ${gapStroke}/>
+      <path d="${d(RECORDED_AFTER)}"  stroke="var(--buzzer)" stroke-width="4"/>
+    </g>
+    <circle cx="${P[0][0]}" cy="${P[0][1]}" r="4.6" fill="#fff" stroke="var(--buzzer)" stroke-width="3"/>
+    <circle cx="${P[P.length-1][0]}" cy="${P[P.length-1][1]}" r="4.6" fill="var(--buzzer)"
+            stroke="#fff" stroke-width="1.6"/>
+    ${showGap ? `<g><rect x="${mid[0]-27}" y="${mid[1]-17}" width="54" height="14" rx="7"
+        fill="var(--hot)"/><text x="${mid[0]}" y="${mid[1]-7}" text-anchor="middle"
+        font-size="9" font-weight="700" fill="#fff"
+        font-family="-apple-system,sans-serif">기록 안 됨</text></g>` : ''}
+    <!-- 출발점이 왼쪽 아래에 있어 캡션은 오른쪽 아래로 뺀다 -->
+    <text x="${W-7}" y="${H-6}" text-anchor="end" font-size="7.5" fill="#8f897d"
+          font-family="-apple-system,sans-serif">지도 타일은 흉내낸 것입니다</text>
+  </svg>`
+}
+
+document.getElementById('mapB').innerHTML = mapSVG(false)
+document.getElementById('mapC').innerHTML = mapSVG(true)
+
+/* A — 지금 앱이 그리는 방식. 배경이 없으니 끊긴 구간도 그냥 한 획이 된다. */
+const all = RECORDED_BEFORE.concat([P[GAP_TO]], RECORDED_AFTER.slice(1))
+;(function drawA(){
+  const xs = all.map(p=>p[0]), ys = all.map(p=>p[1])
+  const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys)
+  const span = Math.max(maxX-minX, maxY-minY) || 1
+  const pad = 6, s = (100-pad*2)/span
+  const pp = all.map(p => [pad + (p[0]-minX)*s, pad + (p[1]-minY)*s])
+  document.getElementById('pA').setAttribute('d', d(pp))
+})()
+</script>

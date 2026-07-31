@@ -129,6 +129,13 @@ function AwayRun({ week, onExit }: { week: number; onExit: () => void }) {
   /** 지나온 좌표. 5m 넘게 움직였을 때만 담아 용량을 줄인다. */
   const track = useRef<[number, number][]>([])
   const hiddenAt = useRef<number | null>(null)
+  /**
+   * 화면이 꺼져 좌표가 끊긴 자리. 돌아온 뒤 처음 담기는 점의 인덱스를 적는다.
+   * 좌표만 있으면 어디가 공백인지 알 수 없어, 지도 위에서 실제로 달린 길과
+   * 두 점을 이어붙인 직선을 구별할 방법이 없다.
+   */
+  const breaks = useRef<number[]>([])
+  const breakPending = useRef(false)
 
   useEffect(() => {
     if (!data.settings.keepAwake) return
@@ -141,7 +148,10 @@ function AwayRun({ week, onExit }: { week: number; onExit: () => void }) {
     const onVis = () => {
       if (document.visibilityState === 'hidden') hiddenAt.current = Date.now()
       else if (hiddenAt.current) {
-        gap.current += (Date.now() - hiddenAt.current) / 1000
+        const away = (Date.now() - hiddenAt.current) / 1000
+        gap.current += away
+        // 잠깐 가린 것까지 끊겼다고 하면 궤적이 점선투성이가 된다
+        if (away > 5) breakPending.current = true
         hiddenAt.current = null
       }
     }
@@ -156,12 +166,20 @@ function AwayRun({ week, onExit }: { week: number; onExit: () => void }) {
         const { latitude: lat, longitude: lon, accuracy } = p.coords
         if (accuracy > 30) return
         const prev = lastFix.current
+        const push = () => {
+          // 화면이 꺼져 있던 동안이라면, 직전 점과 이 점 사이는 달린 길이 아니다
+          if (breakPending.current && track.current.length > 0) {
+            breaks.current.push(track.current.length)
+            breakPending.current = false
+          }
+          track.current.push([lat, lon])
+        }
         if (prev) {
           const d = haversine(prev.lat, prev.lon, lat, lon)
           if (d > 1.5) meters.current += d
-          if (d > 5) track.current.push([lat, lon])
+          if (d > 5) push()
         } else {
-          track.current.push([lat, lon])
+          push()
         }
         lastFix.current = { lat, lon, at: Date.now() }
       },
@@ -210,6 +228,7 @@ function AwayRun({ week, onExit }: { week: number; onExit: () => void }) {
       awayWeek: week,
       meters: data.settings.gpsEnabled ? Math.round(meters.current) : undefined,
       track: data.settings.gpsEnabled && track.current.length > 1 ? track.current : undefined,
+      trackBreaks: breaks.current.length > 0 ? breaks.current : undefined,
       gapSeconds: data.settings.gpsEnabled ? Math.round(gap.current) : undefined,
     }
     addLog(log)

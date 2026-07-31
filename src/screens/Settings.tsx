@@ -131,7 +131,7 @@ function Root({ onGo }: { onGo: (p: Page) => void }) {
           <SItem label={t('howToUse')} sub={t('howToUseSub')} onClick={() => onGo('howto')} />
           <SItem label={t('aboutApp')} sub={t('aboutSub')} onClick={() => onGo('about')} />
           <SItem label={t('safety')} sub={t('safetySub')} onClick={() => onGo('safety')} />
-          <SItem label={t('licenses')} sub="Pretendard · Lucide" onClick={() => onGo('licenses')} />
+          <SItem label={t('licenses')} sub="Pretendard · Lucide · Kakao Maps" onClick={() => onGo('licenses')} />
           <SItem label={t('version')} value={__APP_VERSION__} last />
         </SBox>
       </Fold>
@@ -308,6 +308,10 @@ function Licenses() {
       <Block title="Pretendard">SIL Open Font License 1.1 · orioncactus/pretendard</Block>
       <Block title="React · Vite · Tailwind CSS">MIT License</Block>
       <Block title="vite-plugin-pwa">MIT License</Block>
+      {/* 오픈소스는 아니지만 지도를 빌려 쓰므로 함께 밝힌다 */}
+      <Block title="Kakao Maps JavaScript SDK">
+        © Kakao · 원정 기록의 지도. 카카오 서비스 약관을 따릅니다
+      </Block>
     </>
   )
 }

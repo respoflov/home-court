@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { exName, useStore } from '@/lib/store'
+import { loadKakao } from '@/lib/kakao'
+import type { KakaoLatLng, KakaoOverlay } from '@/lib/kakao'
 import { Badge, Cta, ScreenHead, Sheet } from '@/components/bits'
 import { Figure } from '@/components/Figure'
 import { addDays, mmss, ymd } from '@/lib/time'
@@ -323,7 +325,9 @@ function DayRow({ log, onDelete }: { log: SessionLog; onDelete: () => void }) {
         </button>
       </div>
 
-      {log.track && log.track.length > 1 && <Track points={log.track} />}
+      {log.track && log.track.length > 1 && (
+        <Track points={log.track} breaks={log.trackBreaks} />
+      )}
       {log.gapSeconds != null && log.gapSeconds > 5 && (
         <div className="mt-1 text-[11px]" style={{ color: 'var(--ink-4)' }}>
           {mmss(log.gapSeconds)} {t('estimated')}
@@ -333,13 +337,134 @@ function DayRow({ log, onDelete }: { log: SessionLog; onDelete: () => void }) {
   )
 }
 
+/* ── 지나온 길 ─────────────────────────────────────
+   배경 지도 없이 모양만 그리면 "어디를 달렸는지"를 알 수 없고,
+   끊긴 구간마저 그냥 한 획이 되어 실제 경로와 구별되지 않았다.
+   그래서 카카오 지도 위에 그리되, 기록되지 않은 구간은 점선으로 따로 둔다.
+   판단 과정은 mockup/track-map-options-v2.html 참고. */
+
+const TRACK_H = 152
+
 /**
- * 지나온 궤적. 배경 지도는 없고 좌표를 정규화해 모양만 그린다.
+ * 지도 위의 궤적. SDK는 이 컴포넌트가 화면에 뜰 때만 부른다.
+ * 오프라인이거나 키가 거부되면 배경 없는 SVG로 되돌아간다.
+ * 지도가 안 뜬다고 기록이 빈칸이 되어서는 안 된다.
+ */
+function Track({ points, breaks }: { points: [number, number][]; breaks?: number[] }) {
+  const { t } = useStore()
+  const box = useRef<HTMLDivElement>(null)
+  const [phase, setPhase] = useState<'loading' | 'ready' | 'failed'>('loading')
+  const hasBreak = (breaks?.length ?? 0) > 0
+
+  useEffect(() => {
+    let dead = false
+    const overlays: KakaoOverlay[] = []
+    // 정리할 때 쓸 것은 지금 잡아둔다. 그때는 ref가 이미 바뀌어 있을 수 있다
+    const el = box.current
+
+    loadKakao()
+      .then((kakao) => {
+        if (dead || !el) return
+        const { maps } = kakao
+        const ll = points.map(([lat, lon]) => new maps.LatLng(lat, lon))
+        const map = new maps.Map(el, {
+          center: ll[0],
+          level: 5,
+          draggable: false,
+          zoomable: false,
+        })
+
+        const line = (path: KakaoLatLng[], dashed: boolean) =>
+          overlays.push(
+            new maps.Polyline({
+              path,
+              strokeWeight: dashed ? 4 : 5,
+              strokeColor: dashed ? '#FF4D2E' : '#FFA31A',
+              strokeOpacity: 1,
+              strokeStyle: dashed ? 'shortdash' : 'solid',
+              map,
+            }),
+          )
+
+        // 끊긴 자리에서 잘라 실선 도막들과 점선 구간으로 나눈다
+        const cuts = new Set(breaks ?? [])
+        let seg: KakaoLatLng[] = [ll[0]]
+        for (let i = 1; i < ll.length; i++) {
+          if (cuts.has(i)) {
+            if (seg.length > 1) line(seg, false)
+            line([ll[i - 1], ll[i]], true)
+            seg = [ll[i]]
+          } else {
+            seg.push(ll[i])
+          }
+        }
+        if (seg.length > 1) line(seg, false)
+
+        const dot = (fill: boolean) => {
+          const s = document.createElement('span')
+          s.style.cssText =
+            `display:block;width:12px;height:12px;border-radius:50%;box-sizing:border-box;` +
+            `border:3px solid #FFA31A;background:${fill ? '#FFA31A' : '#fff'};` +
+            `box-shadow:0 0 0 1.5px rgba(255,255,255,.9)`
+          return s
+        }
+        for (const [pos, fill] of [[ll[0], false], [ll[ll.length - 1], true]] as const)
+          overlays.push(new maps.CustomOverlay({ position: pos, content: dot(fill), zIndex: 3, map }))
+
+        const bounds = new maps.LatLngBounds()
+        for (const p of ll) bounds.extend(p)
+        if (!bounds.isEmpty()) map.setBounds(bounds, 22, 22, 22, 22)
+        // 시트가 올라오는 중이면 컨테이너 크기가 아직 확정되지 않는다
+        window.setTimeout(() => {
+          if (dead) return
+          map.relayout()
+          if (!bounds.isEmpty()) map.setBounds(bounds, 22, 22, 22, 22)
+        }, 220)
+
+        setPhase('ready')
+      })
+      .catch(() => {
+        if (!dead) setPhase('failed')
+      })
+
+    return () => {
+      dead = true
+      for (const o of overlays) o.setMap(null)
+      if (el) el.innerHTML = ''
+    }
+  }, [points, breaks])
+
+  return (
+    <div className="mt-2 overflow-hidden rounded-[12px] border" style={{ borderColor: 'var(--line)' }}>
+      {phase === 'failed' ? (
+        <TrackShape points={points} breaks={breaks} note={t('mapFailed')} />
+      ) : (
+        <>
+          <div ref={box} style={{ height: TRACK_H, background: 'var(--raised)' }} />
+          {phase === 'loading' && (
+            <div className="px-3 py-2 text-[11.5px]" style={{ color: 'var(--ink-4)' }}>
+              {t('mapLoading')}
+            </div>
+          )}
+        </>
+      )}
+      {phase === 'ready' && (
+        <div className="px-3 py-2 text-[11.5px]" style={{ color: 'var(--ink-3)' }}>
+          {hasBreak ? t('trackBreakNote') : t('routeShape')}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * 배경 없는 궤적. 지도를 못 불러왔을 때만 쓴다.
  * 위도 1도와 경도 1도의 실제 거리가 달라 위도로 경도를 보정한다.
  */
-function Track({ points }: { points: [number, number][] }) {
-  const { t } = useStore()
-  const d = useMemo(() => {
+function TrackShape({
+  points, breaks, note,
+}: { points: [number, number][]; breaks?: number[]; note: string }) {
+  const segs = useMemo(() => {
     const latMid = points.reduce((a, p) => a + p[0], 0) / points.length
     const k = Math.cos((latMid * Math.PI) / 180)
     const xs = points.map((p) => p[1] * k)
@@ -349,24 +474,39 @@ function Track({ points }: { points: [number, number][] }) {
     const span = Math.max(maxX - minX, maxY - minY) || 1e-6
     const pad = 6
     const scale = (100 - pad * 2) / span
-    return points
-      .map((p, i) => {
-        const x = pad + (p[1] * k - minX) * scale
-        // 위도는 위로 갈수록 커지므로 y를 뒤집는다
-        const y = pad + (maxY - p[0]) * scale
-        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`
-      })
-      .join(' ')
-  }, [points])
+    // 위도는 위로 갈수록 커지므로 y를 뒤집는다
+    const xy = points.map((p) => [pad + (p[1] * k - minX) * scale, pad + (maxY - p[0]) * scale])
+    const d = (pp: number[][]) =>
+      pp.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ')
+
+    const cuts = new Set(breaks ?? [])
+    const out: { d: string; dashed: boolean }[] = []
+    let seg = [xy[0]]
+    for (let i = 1; i < xy.length; i++) {
+      if (cuts.has(i)) {
+        if (seg.length > 1) out.push({ d: d(seg), dashed: false })
+        out.push({ d: d([xy[i - 1], xy[i]]), dashed: true })
+        seg = [xy[i]]
+      } else {
+        seg.push(xy[i])
+      }
+    }
+    if (seg.length > 1) out.push({ d: d(seg), dashed: false })
+    return out
+  }, [points, breaks])
 
   return (
-    <div className="mt-2 flex items-center gap-3 rounded-[12px] border px-3 py-2"
-         style={{ borderColor: 'var(--line)' }}>
-      <svg width="66" height="66" viewBox="0 0 100 100" aria-hidden>
-        <path d={d} fill="none" stroke="var(--buzzer)" strokeWidth="3"
-              strokeLinecap="round" strokeLinejoin="round" />
+    <div className="flex items-center gap-3 px-3 py-2">
+      <svg width="66" height="66" viewBox="0 0 100 100" className="shrink-0" aria-hidden>
+        {segs.map((s, i) => (
+          <path key={i} d={s.d} fill="none"
+                stroke={s.dashed ? 'var(--buzzer-hot)' : 'var(--buzzer)'}
+                strokeWidth={s.dashed ? 2.5 : 3}
+                strokeDasharray={s.dashed ? '4 4' : undefined}
+                strokeLinecap="round" strokeLinejoin="round" />
+        ))}
       </svg>
-      <span className="text-[11.5px]" style={{ color: 'var(--ink-3)' }}>{t('routeShape')}</span>
+      <span className="text-[11.5px]" style={{ color: 'var(--ink-3)' }}>{note}</span>
     </div>
   )
 }

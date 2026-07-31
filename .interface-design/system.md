@@ -31,6 +31,7 @@
 - 소음 마크(NoiseMark): 막대 3개 4/7.5/11px × 3px, 간격 2px. 3단계만 buzzer
 - 히트맵: 셀 26px h, r6, 5주×7일. 강도는 타임아웃/기본/풀 = 30%/55%/100%
   - **원정 링은 앰버가 아니라 `color-mix(in srgb, var(--ink) 55%, transparent)` 2px** — 앰버로 두면 풀 경기(같은 앰버) 위에서 완전히 묻힌다. 범례 스와치·날짜 시트의 점도 같은 값 (`test/heatmap/결과-2026-07-31.md`)
+- 원정 궤적: 카카오맵 위, 높이 152px · r12 카드. 실선 `#FFA31A` 5px, **기록되지 않은 구간만 `#FF4D2E` 4px `shortdash`**. 시작점은 속 빈 원, 끝점은 채운 원(12px, 보더 3px). 지도를 못 불러오면 배경 없는 66px SVG로 되돌아가되 점선은 유지 (`test/map/결과-2026-08-01.md`)
 - 앱 아이콘: 로고와 **같은 좌표를 크롭만 달리** 한 것. 48 좌표계 `[0.535, 11.7, 24.6]`, 선 40% × 굵기 0.85배. 원본 `public/favicon.svg`, 굽는 도구 `test/icon/icon-build.html` (좌표를 늘 같이 고칠 것)
 - 운동 중 테두리: rect x5 y5 w365 h802 rx35, stroke 5 → 3초 전 9, pathLength 100 + dasharray
 - 바텀시트: r24 상단, grab 36×4, dim rgba(4,6,10,.72)
