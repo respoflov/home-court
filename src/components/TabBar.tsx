@@ -1,5 +1,7 @@
+// 화면 아래 5칸 탭 막대
 import { useStore } from '@/lib/store'
 
+// 탭 이름 (오늘·원정·플레이북·기록·설정)
 export type Tab = 'today' | 'away' | 'playbook' | 'record' | 'settings'
 
 const ICONS: Record<Tab, React.ReactNode> = {
@@ -12,6 +14,7 @@ const ICONS: Record<Tab, React.ReactNode> = {
 
 const ORDER: Tab[] = ['today', 'away', 'playbook', 'record', 'settings']
 
+// 현재 탭을 강조하고 누르면 onTab으로 탭을 바꾼다
 export function TabBar({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
   const { t } = useStore()
   const label: Record<Tab, string> = {

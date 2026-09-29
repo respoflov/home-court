@@ -21,6 +21,7 @@ export const DEFAULT_WEIGHTS: Weights = { arm: 2, torso: 4, leg: 6 }
 /** 한 번에 올리는 폭. 팔은 작은 근육이라 더 잘게 올린다. */
 export const STEP: Record<Exclude<LoadGroup, null>, number> = { arm: 1, torso: 2, leg: 2 }
 
+// 성별·경험·가진 덤벨 무게로 부위별 시작 무게를 제안한다
 export function suggestWeights(p: Profile): Weights {
   const sex = p.sex && p.sex !== null ? p.sex : 'unset'
   const exp = p.experience ?? 'none'
@@ -31,6 +32,7 @@ export function suggestWeights(p: Profile): Weights {
   return { arm: Math.min(base.arm, cap), torso: Math.min(base.torso, cap), leg: Math.min(base.leg, cap) }
 }
 
+// 부위에 맞는 무게 (무게를 쓰지 않는 동작이면 null)
 export function weightFor(w: Weights, load: LoadGroup): number | null {
   return load ? w[load] : null
 }

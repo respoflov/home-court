@@ -4,6 +4,7 @@
  */
 let ctx: AudioContext | null = null
 
+// 오디오 컨텍스트를 한 번만 만든다 (지원하지 않으면 null)
 function ac(): AudioContext | null {
   if (typeof window === 'undefined') return null
   if (!ctx) {
@@ -27,6 +28,7 @@ export function primeAudio() {
   o.stop(c.currentTime + 0.01)
 }
 
+// 주파수·길이를 받아 짧은 신호음을 낸다
 function beep(freq: number, dur: number, when = 0, vol = 0.18) {
   const c = ac()
   if (!c) return

@@ -1,3 +1,4 @@
+// 루틴 편집 화면: 쿼터와 운동 칸을 추가·삭제하고 길게 눌러 순서를 바꾼다
 import { useState } from 'react'
 import { exName, rtName, useStore } from '@/lib/store'
 import type { Exercise, Routine, SlotRef } from '@/lib/types'
@@ -7,6 +8,7 @@ import { Figure } from '@/components/Figure'
 import { secondsFor } from '@/lib/session'
 import { mmss } from '@/lib/time'
 
+// 루틴 하나를 고치는 화면 본체
 export function RoutineEdit({ routine, onBack }: { routine: Routine; onBack: () => void }) {
   const { t, lang, data, set, allExercises, exerciseById } = useStore()
   const [draft, setDraft] = useState<Routine>(() => structuredClone(routine))
@@ -114,6 +116,7 @@ export function RoutineEdit({ routine, onBack }: { routine: Routine; onBack: () 
   )
 }
 
+// 쿼터 하나의 편집 블록
 function QuarterBlock({
   label,
   slots,

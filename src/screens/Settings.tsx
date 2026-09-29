@@ -1,3 +1,4 @@
+// 설정 탭: 소리·휴식·조용한 시간대·무게·언어 설정과 안내·라이선스 화면
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '@/lib/store'
 import { Badge, Cta, Fold, NoiseMark, ScreenHead, SBox, SItem, Sheet, Stamp } from '@/components/bits'
@@ -5,8 +6,10 @@ import { fmtWindow } from '@/lib/time'
 import { STEP } from '@/lib/weights'
 import type { LoadGroup } from '@/lib/types'
 
+// 설정 안의 하위 화면 이름
 type Page = 'root' | 'about' | 'howto' | 'remind' | 'install' | 'safety' | 'weights' | 'licenses'
 
+// 하위 화면 전환을 담당하는 설정 탭 본체
 export function Settings({ resetSignal = 0 }: { resetSignal?: number }) {
   const [page, setPage] = useState<Page>('root')
   // 탭바의 '설정'을 다시 누르면 하위 화면에서 빠져나온다
@@ -17,6 +20,7 @@ export function Settings({ resetSignal = 0 }: { resetSignal?: number }) {
   return <Sub page={page} onBack={() => setPage('root')} />
 }
 
+// 설정 첫 화면
 function Root({ onGo }: { onGo: (p: Page) => void }) {
   const { t, data, setSettings, set, exportBackup, importBackup, resetAll } = useStore()
   const { settings } = data
@@ -218,6 +222,7 @@ function Sub({ page, onBack }: { page: Page; onBack: () => void }) {
   )
 }
 
+// 안내 화면의 제목 있는 문단
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-b py-[14px] text-[12.5px] leading-[1.72] last:border-b-0"
@@ -228,6 +233,7 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   )
 }
 
+// 안내 화면의 목록 항목
 function Li({ children }: { children: React.ReactNode }) {
   return (
     <span className="mt-[7px] block border-l-2 pl-[11px] text-[12px]"
@@ -237,6 +243,7 @@ function Li({ children }: { children: React.ReactNode }) {
   )
 }
 
+// 앱 소개 화면
 function About() {
   const { t } = useStore()
   return (
@@ -263,6 +270,7 @@ function About() {
   )
 }
 
+// 홈 화면 추가 안내 (아이폰·안드로이드)
 export function Install() {
   const { t } = useStore()
   return (
@@ -278,6 +286,7 @@ export function Install() {
   )
 }
 
+// 기기 알람으로 운동 시간을 알리는 방법 안내
 function Remind() {
   const { t, lang } = useStore()
   return (
@@ -297,11 +306,13 @@ function Remind() {
   )
 }
 
+// 안전 안내
 function Safety() {
   const { t } = useStore()
   return <Block title={t('safety')}>{t('safetyBody')}</Block>
 }
 
+// 오픈소스 라이선스 목록
 function Licenses() {
   return (
     <>
@@ -316,6 +327,7 @@ function Licenses() {
   )
 }
 
+// 부위별 덤벨 무게 설정 화면
 function WeightsPage() {
   const { t, lang, data, set } = useStore()
   const groups: { key: Exclude<LoadGroup, null>; label: string; ex: string }[] = [

@@ -1,3 +1,4 @@
+// 앱 최상위 화면: 스플래시·최초 안내 → 5개 탭(오늘·원정·플레이북·기록·설정)과 전체 화면 모달을 전환한다
 import { useMemo, useState } from 'react'
 import { Store, useStore } from '@/lib/store'
 import { Splash } from '@/components/Splash'
@@ -17,12 +18,14 @@ import { buildSteps } from '@/lib/session'
 import type { Exercise, Routine } from '@/lib/types'
 import * as sound from '@/lib/sound'
 
+// 탭 위에 전체 화면으로 뜨는 화면 종류 (운동 진행·루틴 편집·운동 편집)
 type Modal =
   | { kind: 'none' }
   | { kind: 'live'; routine: Routine }
   | { kind: 'routine'; routine: Routine }
   | { kind: 'exercise'; editing: Exercise | null }
 
+// 탭·모달 전환과 스플래시·온보딩 흐름을 담당하는 본체
 function Shell() {
   const { t, data, set, allRoutines, exerciseById, quietNow } = useStore()
   const [splash, setSplash] = useState(true)
@@ -156,6 +159,7 @@ function Shell() {
   )
 }
 
+// 전역 상태(Store)로 본체를 감싼 루트 컴포넌트
 export default function App() {
   return (
     <Store>

@@ -15,6 +15,7 @@ declare global {
   }
 }
 
+// 이 앱이 쓰는 카카오 지도 객체들의 최소 타입
 export interface KakaoLatLng {
   getLat(): number
   getLng(): number
@@ -62,6 +63,7 @@ export interface KakaoNamespace {
 
 let pending: Promise<KakaoNamespace> | null = null
 
+// 카카오맵 SDK를 한 번만 불러온다. 실패하면 지도 없이 기록만 보여 준다
 export function loadKakao(): Promise<KakaoNamespace> {
   if (window.kakao?.maps?.Map) return Promise.resolve(window.kakao)
   if (pending) return pending

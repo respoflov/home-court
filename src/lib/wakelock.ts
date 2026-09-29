@@ -6,6 +6,7 @@ type Sentinel = { release: () => Promise<void>; released: boolean }
 
 let held: Sentinel | null = null
 
+// 화면 꺼짐 방지를 요청한다. 성공 여부를 돌려준다
 export async function acquire(): Promise<boolean> {
   const nav = navigator as Navigator & { wakeLock?: { request: (t: 'screen') => Promise<Sentinel> } }
   if (!nav.wakeLock) return false
@@ -17,6 +18,7 @@ export async function acquire(): Promise<boolean> {
   }
 }
 
+// 화면 꺼짐 방지를 해제한다
 export async function release() {
   try {
     await held?.release()
@@ -26,6 +28,7 @@ export async function release() {
   held = null
 }
 
+// 지금 화면 꺼짐 방지가 걸려 있는지
 export function isHeld() {
   return !!held && !held.released
 }

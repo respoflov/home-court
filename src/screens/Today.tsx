@@ -1,3 +1,4 @@
+// 오늘 탭: 오늘의 루틴과 순서를 보여 주고 운동을 시작한다
 import { useMemo } from 'react'
 import { rtName, useStore } from '@/lib/store'
 import { gearOf, lineup, totalSeconds, buildSteps } from '@/lib/session'
@@ -14,6 +15,7 @@ const GEAR_LABEL: Record<string, [string, string]> = {
   towel: ['수건', 'Towel'],
 }
 
+// 오늘 탭 본체
 export function Today({
   routine,
   onPickSize,
@@ -187,6 +189,7 @@ export function Today({
   )
 }
 
+// 오늘의 순서 한 줄 (쿼터 이름·동작·시간)
 function Row({
   row,
   lang,

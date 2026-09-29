@@ -1,3 +1,4 @@
+// 여러 화면이 함께 쓰는 UI 조각 모음 (로고·시트·배지·설정 행·토글·입력칸 등)
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
@@ -35,6 +36,7 @@ export function NoiseMark({ level, className = '' }: { level: Noise; className?:
 const CLOSE_PX = 90
 const CLOSE_VELOCITY = 0.55
 
+// 아래에서 올라오는 바텀시트. 손잡이를 아래로 밀면 닫힌다
 export function Sheet({
   open,
   onClose,
@@ -202,6 +204,7 @@ export function ScreenHead({
   )
 }
 
+// 작은 상태 배지
 export function Badge({
   children,
   muted,
@@ -262,6 +265,7 @@ export function Fold({
   )
 }
 
+// 설정 목록 그룹 제목
 export function GroupLabel({ children }: { children: ReactNode }) {
   return (
     <div className="mb-[9px] text-[10.5px] font-bold tracking-[0.12em]" style={{ color: 'var(--ink-4)' }}>
@@ -282,6 +286,7 @@ export function SBox({ children }: { children: ReactNode }) {
   )
 }
 
+// 설정 목록의 한 줄 (아이콘·제목·값·화살표)
 export function SItem({
   label,
   sub,
@@ -339,6 +344,7 @@ export function SItem({
   )
 }
 
+// 켜짐·꺼짐 스위치 모양
 export function Toggle({ on }: { on: boolean }) {
   return (
     <span
@@ -386,6 +392,7 @@ export function Picker<T extends string>({
   )
 }
 
+// 제목이 붙은 입력 영역
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="mb-[15px]">
@@ -397,6 +404,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
   )
 }
 
+// 한 줄 글자 입력칸
 export function TextInput({
   value,
   onChange,

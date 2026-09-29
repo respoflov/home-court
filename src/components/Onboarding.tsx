@@ -1,3 +1,4 @@
+// 최초 실행 안내: 앱 소개와 기본 정보(덤벨·경험) 입력
 import { useState } from 'react'
 import { useStore } from '@/lib/store'
 import { Cta, Field, NoiseMark, Picker, TextInput } from './bits'
@@ -115,6 +116,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   )
 }
 
+// 안내 화면 한 장의 공통 틀 (제목과 본문)
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
   const { t } = useStore()
   return (

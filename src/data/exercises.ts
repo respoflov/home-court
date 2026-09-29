@@ -356,4 +356,5 @@ export const BUILTIN_EXERCISES: Exercise[] = [
   }),
 ]
 
+// 운동 id로 기본 운동을 빠르게 찾는 표
 export const EXERCISE_BY_ID = new Map(BUILTIN_EXERCISES.map((x) => [x.id, x]))

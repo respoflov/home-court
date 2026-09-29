@@ -1,3 +1,4 @@
+// 앱 전역 상태(React Context): 데이터 저장과 운동·루틴 조회 함수를 모든 화면에 제공한다
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { AppData, Exercise, Feel, Routine, SessionLog, Settings, Weights } from './types'
@@ -44,6 +45,7 @@ const EMPTY: AppData = {
   figureOff: [],
 }
 
+// localStorage에서 데이터를 읽는다. 예전 버전에 없던 필드는 기본값으로 채운다
 function load(): AppData {
   try {
     const raw = localStorage.getItem(KEY)
@@ -64,6 +66,7 @@ function load(): AppData {
   }
 }
 
+// 화면에 제공하는 상태와 동작 목록
 interface Ctx {
   data: AppData
   set: (patch: Partial<AppData>) => void
@@ -93,6 +96,7 @@ interface Ctx {
 
 const C = createContext<Ctx | null>(null)
 
+// 전역 상태를 만들고 바뀔 때마다 저장하는 Provider
 export function Store({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(load)
   const [tick, setTick] = useState(0)
@@ -260,6 +264,7 @@ export function Store({ children }: { children: ReactNode }) {
   return <C.Provider value={value}>{children}</C.Provider>
 }
 
+// 화면에서 전역 상태를 꺼내 쓰는 훅
 export function useStore() {
   const v = useContext(C)
   if (!v) throw new Error('useStore must be used inside <Store>')

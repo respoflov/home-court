@@ -1,3 +1,4 @@
+// Vite 빌드 설정: GitHub Pages 경로(base), 버전 주입, React·Tailwind·PWA 플러그인
 import path from "node:path"
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"

@@ -7,8 +7,10 @@ export type Part = 'warmup' | 'core' | 'lower' | 'upper' | 'cardio' | 'cooldown'
 /** 무게를 붙일 수 있는 부위 묶음. 덤벨 무게는 이 단위로 관리한다. */
 export type LoadGroup = 'arm' | 'torso' | 'leg' | null
 
+// 운동에 필요한 도구
 export type Gear = 'mat' | 'dumbbell' | 'stepper' | 'chair' | 'wall' | 'towel' | 'none'
 
+// 운동 하나의 정보
 export interface Exercise {
   id: string
   /** 기본 제공 운동인지. true면 삭제 대신 숨김만 가능하다. */
@@ -34,6 +36,7 @@ export interface Exercise {
   hidden?: boolean
 }
 
+// 쿼터 안의 운동 칸 (운동 id·세트 수·양)
 export interface SlotRef {
   exerciseId: string
   /** 루틴 안에서 덮어쓴 값. 없으면 운동의 기본값을 쓴다. */
@@ -41,6 +44,7 @@ export interface SlotRef {
   sets?: number
 }
 
+// 루틴을 이루는 구간(쿼터)
 export interface Quarter {
   id: string
   labelKo: string
@@ -48,6 +52,7 @@ export interface Quarter {
   slots: SlotRef[]
 }
 
+// 루틴 하나
 export interface Routine {
   id: string
   builtin: boolean
@@ -58,6 +63,7 @@ export interface Routine {
   quarters: Quarter[]
 }
 
+// 운동 한 번의 기록
 export interface SessionLog {
   id: string
   /** 'home' = 실내 홈트, 'away' = 러닝 */
@@ -100,8 +106,10 @@ export interface SessionLog {
   gapSeconds?: number
 }
 
+// 세트 뒤 느낌 (쉬웠다·딱 좋았다·힘들었다)
 export type Feel = 'easy' | 'good' | 'hard'
 
+// 무게 제안에 쓰는 사용자 정보
 export interface Profile {
   sex: 'female' | 'male' | 'unset' | null
   experience: 'none' | 'some' | 'used' | null
@@ -109,18 +117,21 @@ export interface Profile {
   dumbbellMax: number | null
 }
 
+// 부위별 덤벨 무게
 export interface Weights {
   arm: number
   torso: number
   leg: number
 }
 
+// 소음 동작을 빼는 시간대
 export interface QuietWindow {
   /** 분 단위 (0~1439) */
   from: number
   to: number
 }
 
+// 사용자 설정
 export interface Settings {
   theme: 'light' | 'system' | 'dark'
   lang: 'ko' | 'en'
@@ -139,6 +150,7 @@ export interface Settings {
   gpsEnabled: boolean
 }
 
+// localStorage에 저장하는 앱 데이터 전체
 export interface AppData {
   version: 1
   settings: Settings

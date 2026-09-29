@@ -35,6 +35,7 @@ export function Figure({
   )
 }
 
+// 이 운동의 동작 그림이 있는지 확인한다
 export function hasFigure(id: string) {
   return !!FIGURES[id]
 }

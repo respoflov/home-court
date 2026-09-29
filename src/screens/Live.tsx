@@ -1,3 +1,4 @@
+// 운동 진행 화면: 스텝마다 타이머를 돌리고 화면 테두리로 남은 시간을 보여 준다
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { exCue, exName, exWarn, useStore } from '@/lib/store'
 import type { Step } from '@/lib/session'
@@ -519,6 +520,7 @@ export function Live({
   )
 }
 
+// 같은 운동이 계속 쉬웠을 때 무게를 올릴지 묻는 시트
 function RaiseSheet({
   exercise,
   onYes,

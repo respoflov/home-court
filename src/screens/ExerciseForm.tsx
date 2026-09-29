@@ -1,3 +1,4 @@
+// 운동 추가·편집 화면
 import { useState } from 'react'
 import { useStore } from '@/lib/store'
 import type { Exercise, Gear, Noise, Part } from '@/lib/types'
@@ -9,6 +10,7 @@ const GEAR_LABEL: Record<Gear, [string, string]> = {
   chair: ['의자', 'Chair'], wall: ['벽', 'Wall'], towel: ['수건', 'Towel'], none: ['없음', 'None'],
 }
 
+// 새 운동을 만들거나 내가 만든 운동을 고치는 폼
 export function ExerciseForm({ editing, onBack }: { editing: Exercise | null; onBack: () => void }) {
   const { t, lang, data, set } = useStore()
   const [name, setName] = useState(editing ? (lang === 'ko' ? editing.nameKo : editing.nameEn) : '')

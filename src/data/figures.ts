@@ -22,6 +22,7 @@ const G_STAND = 'M16 110 H104'
 const G_FLOOR = 'M10 100 H110'
 const G_WALL = 'M22 12 V110 M22 110 H104'
 
+// 동작 그림을 조립하는 SVG 조각 (머리·몸통·팔다리·먼 쪽 팔다리·발·동작 표시·덤벨)
 const head = (x: number, y: number) => `<circle class="hd" cx="${x}" cy="${y}" r="9"/>`
 const torso = (d: string) => `<path class="ts" d="${d}"/>`
 const limb = (d: string) => `<path class="lb" d="${d}"/>`

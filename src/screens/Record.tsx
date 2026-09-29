@@ -1,3 +1,4 @@
+// 기록 탭: 달력 히트맵, 통계, 날짜별 운동 기록
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { exName, useStore } from '@/lib/store'
 import { loadKakao } from '@/lib/kakao'
@@ -260,6 +261,7 @@ export function Record() {
   )
 }
 
+// 통계 숫자 한 칸
 function Stat({ label, value, unit }: { label: string; value: string; unit: string }) {
   return (
     <div className="flex-1 rounded-[16px] border px-4 py-3" style={{ borderColor: 'var(--line)' }}>
@@ -272,6 +274,7 @@ function Stat({ label, value, unit }: { label: string; value: string; unit: stri
   )
 }
 
+// 자주 한 동작 한 줄
 function MoveRow({ id, n }: { id: string; n: number }) {
   const { t, lang, exerciseById } = useStore()
   const x = exerciseById(id)
@@ -290,6 +293,7 @@ function MoveRow({ id, n }: { id: string; n: number }) {
   )
 }
 
+// 하루 기록 한 줄 (지우기 가능)
 function DayRow({ log, onDelete }: { log: SessionLog; onDelete: () => void }) {
   const { t, lang } = useStore()
   return (
@@ -511,6 +515,7 @@ function TrackShape({
   )
 }
 
+// 날짜를 "2026년 7월 29일" 형식으로 바꾼다 (영어면 July 29, 2026)
 function fmtDateLong(date: string, lang: 'ko' | 'en') {
   const [y, m, d] = date.split('-').map(Number)
   return lang === 'ko'

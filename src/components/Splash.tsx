@@ -1,3 +1,4 @@
+// 앱을 열 때마다 나오는 진입 화면
 import { useEffect, useState } from 'react'
 import { Logo, Stamp } from './bits'
 import { useStore } from '@/lib/store'

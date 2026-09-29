@@ -1,3 +1,4 @@
+// 원정 탭: GPS로 러닝 경로를 기록하고 카카오맵 위에 궤적을 그린다
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '@/lib/store'
 import { AWAY_PROGRAM } from '@/data/routines'
@@ -326,6 +327,7 @@ function AwayRun({ week, onExit }: { week: number; onExit: () => void }) {
   )
 }
 
+// 두 좌표 사이의 거리(m)를 구한다 (하버사인 공식)
 function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371000
   const p = Math.PI / 180

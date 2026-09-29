@@ -1,5 +1,7 @@
+// 기본 루틴 정의 (타임아웃·기본 경기·풀 경기)
 import type { Routine } from '@/lib/types'
 
+// 쿼터 하나를 만드는 줄임 함수. slots = [운동 id, 세트 수, 양]
 const q = (id: string, labelKo: string, labelEn: string, slots: [string, number?, number?][]) => ({
   id,
   labelKo,

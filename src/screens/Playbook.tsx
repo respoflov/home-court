@@ -1,3 +1,4 @@
+// 플레이북 탭: 루틴 목록과 운동 목록을 보고 편집한다
 import { useMemo, useState } from 'react'
 import { exName, exWarn, rtName, useStore } from '@/lib/store'
 import type { Exercise, Part, Routine } from '@/lib/types'
@@ -7,6 +8,7 @@ import { Figure } from '@/components/Figure'
 
 const PARTS: Part[] = ['warmup', 'core', 'lower', 'upper', 'cardio', 'cooldown']
 
+// 루틴·운동 목록 화면 본체
 export function Playbook({
   onEditRoutine,
   onAddExercise,
@@ -245,6 +247,7 @@ export function Playbook({
   )
 }
 
+// 루틴 요약 한 줄 (총 시간·동작 수·구간 수)
 function Summary({ routine }: { routine: Routine }) {
   const { t, lang, data, exerciseById } = useStore()
   const steps = buildSteps(routine, exerciseById, data.settings.restSeconds, false)
@@ -260,6 +263,7 @@ function Summary({ routine }: { routine: Routine }) {
   )
 }
 
+// 루틴 카드 한 장
 function RoutineCard({
   routine,
   onOpen,

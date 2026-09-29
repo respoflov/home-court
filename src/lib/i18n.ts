@@ -1,3 +1,4 @@
+// 앱 언어
 export type Lang = 'ko' | 'en'
 
 /**
@@ -412,12 +413,15 @@ const D = {
   importFailed: ['백업 파일을 읽을 수 없습니다', 'That file could not be read'],
 } as const
 
+// 문구 키 이름
 export type Key = keyof typeof D
 
+// 키에 해당하는 문구를 선택한 언어로 돌려준다
 export function tr(lang: Lang, key: Key): string {
   return D[key][lang === 'ko' ? 0 : 1]
 }
 
+// 요일·월 이름 표
 export const WEEKDAYS = {
   ko: ['일', '월', '화', '수', '목', '금', '토'],
   en: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],

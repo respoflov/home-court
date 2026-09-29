@@ -1,5 +1,7 @@
+// 루틴을 실제 진행 순서(운동·휴식 스텝 목록)로 펼치는 계산 모듈
 import type { Exercise, Quarter, Routine } from './types'
 
+// 진행 화면이 한 칸씩 넘기는 스텝 하나 (운동 또는 휴식)
 export interface Step {
   kind: 'work' | 'rest'
   exercise: Exercise
@@ -39,10 +41,12 @@ const REST_RATIO: Record<Exercise['part'], number> = {
   cardio: 1,
 }
 
+// 운동 종류에 맞는 휴식 시간 (설정의 휴식 시간 × 비율, 최소 5초)
 export function restFor(x: Exercise, base: number): number {
   return Math.max(5, Math.round(base * REST_RATIO[x.part]))
 }
 
+// 루틴을 운동·휴식 스텝 목록으로 펼친다. dropNoisy면 발소리 나는 동작을 뺀다
 export function buildSteps(
   routine: Routine,
   lookup: (id: string) => Exercise | undefined,
@@ -106,6 +110,7 @@ export function buildSteps(
   return steps
 }
 
+// 스텝 전체의 총 시간(초)
 export function totalSeconds(steps: Step[]): number {
   return steps.reduce((a, s) => a + s.seconds, 0)
 }
@@ -119,6 +124,7 @@ export interface LineupRow {
   seconds: number
 }
 
+// 「오늘의 순서」 화면에 쓰는 쿼터별 한 줄 요약
 export function lineup(
   routine: Routine,
   lookup: (id: string) => Exercise | undefined,
